@@ -27,12 +27,14 @@ turn: # TURN server configuration
 
 cache: # Redis server configuration for cache cluster
   url: http://127.0.0.1:6379
-  replicaUrls: http://127.0.0.1:6379
+  replicaUrls: 
+    - http://127.0.0.1:6379
 
 directory:
   redis: # Redis server configuration for directory cluster
     url: http://127.0.0.1:6379
-    replicaUrls: http://127.0.0.1:6379
+    replicaUrls: 
+      - http://127.0.0.1:6379
   client: # Configuration for interfacing with Contact Discovery Service cluster
     userAuthenticationTokenSharedSecret: # hex-encoded secret shared with CDS used to generate auth tokens for Signal users
     userAuthenticationTokenUserIdSecret: # hex-encoded secret shared among Signal-Servers to obscure user phone numbers from CDS
@@ -49,7 +51,8 @@ directory:
 
 messageCache: # Redis server configuration for message store cache
   url: http://127.0.0.1:6379
-  replicaUrls: http://127.0.0.1:6379
+  replicaUrls: 
+    - http://127.0.0.1:6379
 
 messageStore: # Postgresql database configuration for message store
   driverClass: org.postgresql.Driver
