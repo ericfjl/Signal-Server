@@ -7,8 +7,8 @@ twilio: # Twilio gateway configuration
     # - # Third number
     # - # ...
     # - # Nth number
-  # messagingServicesId: 
-  # localDomain: # Domain Twilio can connect back to for calls. Should be domain of your service.
+  messagingServicesId: 123456
+  localDomain: http://127.0.0.1 # Domain Twilio can connect back to for calls. Should be domain of your service.
 
 push:
   queueSize: 1024 # Size of push pending queue
@@ -36,22 +36,29 @@ directory:
     replicaUrls: 
       - http://127.0.0.1:6379
   client: # Configuration for interfacing with Contact Discovery Service cluster
-    userAuthenticationTokenSharedSecret: # hex-encoded secret shared with CDS used to generate auth tokens for Signal users
-    userAuthenticationTokenUserIdSecret: # hex-encoded secret shared among Signal-Servers to obscure user phone numbers from CDS
+    userAuthenticationTokenSharedSecret: ffffff # hex-encoded secret shared with CDS used to generate auth tokens for Signal users
+    userAuthenticationTokenUserIdSecret: ffffff # hex-encoded secret shared among Signal-Servers to obscure user phone numbers from CDS
   sqs:
     accessKey: 624364587793      # AWS SQS accessKey
     accessSecret: secretdev  # AWS SQS accessSecret
     queueUrl: https://sqs.ap-southeast-1.amazonaws.com      # AWS SQS queue url
-  # server:
-  #   replicationUrl:                # CDS replication endpoint base url
-  #   replicationPassword:           # CDS replication endpoint password
-  #   replicationCaCertificate:      # CDS replication endpoint TLS certificate trust root
-  #   reconciliationChunkSize:       # CDS reconciliation chunk size
-  #   reconciliationChunkIntervalMs: # CDS reconciliation chunk interval, in milliseconds
+  server:
+    replicationUrl: https://sqs.ap-southeast-1.amazonaws.com   # CDS replication endpoint base url
+    replicationPassword: ffffff          # CDS replication endpoint password
+    replicationCaCertificate: ffffff     # CDS replication endpoint TLS certificate trust root
+    # reconciliationChunkSize: 1000      # CDS reconciliation chunk size
+    # reconciliationChunkIntervalMs: 1000 # CDS reconciliation chunk interval, in milliseconds
 
 messageCache: # Redis server configuration for message store cache
+  redis: 
+    url: http://127.0.0.1:6379
+    replicaUrls:
+      - http://127.0.0.1:6379
+
+
+pushScheduler: 
   url: http://127.0.0.1:6379
-  replicaUrls: 
+  replicaUrls:
     - http://127.0.0.1:6379
 
 messageStore: # Postgresql database configuration for message store
@@ -59,6 +66,15 @@ messageStore: # Postgresql database configuration for message store
   user: signal
   password: signal123
   url: jdbc:postgresql://127.0.0.1:5433/messagedb
+
+abuseDatabase: # Postgresql database configuration for abuse store
+  driverClass: org.postgresql.Driver
+  user: signal
+  password: signal123
+  url: jdbc:postgresql://127.0.0.1:5433/abusedb
+
+accountDatabaseCrawler:
+  chunkSize: 1000
 
 attachments: # AWS S3 configuration
   accessKey: AKIAIAYIW4BWBR2U7HIA
@@ -77,11 +93,21 @@ database: # Postgresql database configuration
   password: signal123
   url: jdbc:postgresql://127.0.0.1:5433/accountdb
 
-# apn: # Apple Push Notifications configuration
-#   bundleId:
-#   pushCertificate:
-#   pushKey:
+unidentifiedDelivery:
+  certificate: MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMQ
+  privateKey: TTEyMzQ1Njc4OU0xMjM0NTY3ODlNMTIzNDU2Nzg5MDE=
+  expiresDays: 2
 
-# gcm: # GCM Configuration
-#   senderId:
-#   apiKey:
+voiceVerification:
+  url: http://127.0.0.1:6379
+  locales:
+    - ffffff
+
+apn: # Apple Push Notifications configuration
+  bundleId: 123456
+  pushCertificate: AKIAIAYIW4BWBR2U7HIA
+  pushKey: AKIAIAYIW4BWBR2U7HIA
+
+gcm: # GCM Configuration
+  senderId: 123456
+  apiKey: AKIAIAYIW4BWBR2U7HIA
