@@ -8,7 +8,7 @@ twilio: # Twilio gateway configuration
     # - # ...
     # - # Nth number
   messagingServicesId: 123456
-  localDomain: http://127.0.0.1 # Domain Twilio can connect back to for calls. Should be domain of your service.
+  localDomain: 127.0.0.1 # Domain Twilio can connect back to for calls. Should be domain of your service.
 
 push:
   queueSize: 1024 # Size of push pending queue
