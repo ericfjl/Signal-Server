@@ -1,25 +1,25 @@
 twilio: # Twilio gateway configuration
-  accountId: AC202b569ccbf89529acd547e322b0f03d
-  accountToken: 6ee4037d1f404cb6feee7faafc6eb196
+  accountId: ACe53c252e22cb561c107925bd1c98845f
+  accountToken: b3c674bfc67e9521cfa4923e30073597
   numbers: # Numbers allocated in Twilio
     - 18782084631 # First number
-    - # Second number
-    - # Third number
-    - # ...
-    - # Nth number
-  messagingServicesId: 
-  localDomain: # Domain Twilio can connect back to for calls. Should be domain of your service.
+    # - # Second number
+    # - # Third number
+    # - # ...
+    # - # Nth number
+  # messagingServicesId: 
+  # localDomain: # Domain Twilio can connect back to for calls. Should be domain of your service.
 
 push:
-  queueSize: # Size of push pending queue
+  queueSize: 1024 # Size of push pending queue
 
-redphone:
-  authKey: # Deprecated
+# redphone:
+#   authKey: # Deprecated
 
 turn: # TURN server configuration
   secret: test # TURN server secret
   uris:
-    - turn:127.0.0.1:3478
+    - turn:103.218.240.185:4433
     # - stun:yourdomain:80
     # - stun:yourdomain.com:443
     # - turn:yourdomain:443?transport=udp
@@ -27,29 +27,29 @@ turn: # TURN server configuration
 
 cache: # Redis server configuration for cache cluster
   url: http://127.0.0.1:6379
-  replicaUrls: 
+  replicaUrls: http://127.0.0.1:6379
 
 directory:
   redis: # Redis server configuration for directory cluster
     url: http://127.0.0.1:6379
-    replicaUrls:
+    replicaUrls: http://127.0.0.1:6379
   client: # Configuration for interfacing with Contact Discovery Service cluster
     userAuthenticationTokenSharedSecret: # hex-encoded secret shared with CDS used to generate auth tokens for Signal users
     userAuthenticationTokenUserIdSecret: # hex-encoded secret shared among Signal-Servers to obscure user phone numbers from CDS
   sqs:
-    accessKey:      # AWS SQS accessKey
-    accessSecret:   # AWS SQS accessSecret
-    queueUrl:       # AWS SQS queue url
-  server:
-    replicationUrl:                # CDS replication endpoint base url
-    replicationPassword:           # CDS replication endpoint password
-    replicationCaCertificate:      # CDS replication endpoint TLS certificate trust root
-    reconciliationChunkSize:       # CDS reconciliation chunk size
-    reconciliationChunkIntervalMs: # CDS reconciliation chunk interval, in milliseconds
+    accessKey: 624364587793      # AWS SQS accessKey
+    accessSecret: secretdev  # AWS SQS accessSecret
+    queueUrl: https://sqs.ap-southeast-1.amazonaws.com      # AWS SQS queue url
+  # server:
+  #   replicationUrl:                # CDS replication endpoint base url
+  #   replicationPassword:           # CDS replication endpoint password
+  #   replicationCaCertificate:      # CDS replication endpoint TLS certificate trust root
+  #   reconciliationChunkSize:       # CDS reconciliation chunk size
+  #   reconciliationChunkIntervalMs: # CDS reconciliation chunk interval, in milliseconds
 
 messageCache: # Redis server configuration for message store cache
-  url:
-  replicaUrls:
+  url: http://127.0.0.1:6379
+  replicaUrls: http://127.0.0.1:6379
 
 messageStore: # Postgresql database configuration for message store
   driverClass: org.postgresql.Driver
@@ -58,15 +58,15 @@ messageStore: # Postgresql database configuration for message store
   url: jdbc:postgresql://127.0.0.1:5433/messagedb
 
 attachments: # AWS S3 configuration
-  accessKey:
-  accessSecret:
-  bucket:
+  accessKey: AKIAIAYIW4BWBR2U7HIA
+  accessSecret: ocRCjLRwaG5OBlwywWuRU3PICWqkoy0U9
+  bucket: tick-s3
 
 profiles: # AWS S3 configuration
-  accessKey:
-  accessSecret:
-  bucket:
-  region:
+  accessKey: AKIAIAYIW4BWBR2U7HIA
+  accessSecret: ocRCjLRwaG5OBlwywWuRU3PICWqkoy0U9
+  bucket: tick-s3
+  region: ap-southeast-1
 
 database: # Postgresql database configuration
   driverClass: org.postgresql.Driver
@@ -74,11 +74,11 @@ database: # Postgresql database configuration
   password: signal123
   url: jdbc:postgresql://127.0.0.1:5433/accountdb
 
-apn: # Apple Push Notifications configuration
-  bundleId:
-  pushCertificate:
-  pushKey:
+# apn: # Apple Push Notifications configuration
+#   bundleId:
+#   pushCertificate:
+#   pushKey:
 
-gcm: # GCM Configuration
-  senderId:
-  apiKey:
+# gcm: # GCM Configuration
+#   senderId:
+#   apiKey:
