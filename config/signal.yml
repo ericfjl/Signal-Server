@@ -104,10 +104,10 @@ voiceVerification:
     - ffffff
 
 apn: # Apple Push Notifications configuration
-  bundleId: 123456
-  pushCertificate: AKIAIAYIW4BWBR2U7HIA
-  pushKey: AKIAIAYIW4BWBR2U7HIA
+  bundleId: com.secret.signalTest
+  pushCertificate: ../config/signal.p12
+  pushKey: 123456
 
 gcm: # GCM Configuration
-  senderId: 123456
-  apiKey: AKIAIAYIW4BWBR2U7HIA
+  senderId: 837746899989
+  apiKey: AIzaSyBs1uZiYWJ2HWU5I1s-yFHicZLjuGVSPFw
