@@ -63,15 +63,15 @@ pushScheduler:
 
 messageStore: # Postgresql database configuration for message store
   driverClass: org.postgresql.Driver
-  user: signal
-  password: signal123
-  url: jdbc:postgresql://localhost:5433/messagedb
+  user: postgres
+  password: postgres123
+  url: jdbc:postgresql://localhost:5432/messagedb
 
 abuseDatabase: # Postgresql database configuration for abuse store
   driverClass: org.postgresql.Driver
-  user: signal
-  password: signal123
-  url: jdbc:postgresql://localhost:5433/abusedb
+  user: postgres
+  password: postgres123
+  url: jdbc:postgresql://localhost:5432/abusedb
 
 accountDatabaseCrawler:
   chunkSize: 1000
@@ -89,9 +89,9 @@ profiles: # AWS S3 configuration
 
 database: # Postgresql database configuration
   driverClass: org.postgresql.Driver
-  user: signal
-  password: signal123
-  url: jdbc:postgresql://localhost:5433/accountdb
+  user: postgres
+  password: postgres123
+  url: jdbc:postgresql://localhost:5432/accountdb
 
 unidentifiedDelivery:
   certificate: MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMQ
