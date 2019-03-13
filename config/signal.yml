@@ -2,12 +2,12 @@ twilio: # Twilio gateway configuration
   accountId: ACe53c252e22cb561c107925bd1c98845f
   accountToken: b3c674bfc67e9521cfa4923e30073597
   numbers: # Numbers allocated in Twilio
-    - 18782084631 # First number
+    - +12565884593 # First number
     # - # Second number
     # - # Third number
     # - # ...
     # - # Nth number
-  messagingServicesId: 123456
+  messagingServicesId: ACe53c252e22cb561c107925bd1c98845f
   localDomain: 127.0.0.1 # Domain Twilio can connect back to for calls. Should be domain of your service.
 
 push:
@@ -105,9 +105,17 @@ voiceVerification:
 
 apn: # Apple Push Notifications configuration
   bundleId: com.secret.signalTest
-  pushCertificate: ../config/signal.p12
+  pushCertificate: /Users/jlfang/Downloads/signal.pem
   pushKey: 123456
 
 gcm: # GCM Configuration
   senderId: 837746899989
   apiKey: AIzaSyBs1uZiYWJ2HWU5I1s-yFHicZLjuGVSPFw
+
+server:
+  applicationConnectors:
+  - type: http 
+    port: 9000
+  adminConnectors:
+  - type: http
+    port: 9001
