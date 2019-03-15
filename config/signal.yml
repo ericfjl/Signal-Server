@@ -7,7 +7,7 @@ twilio: # Twilio gateway configuration
     # - # Third number
     # - # ...
     # - # Nth number
-  # messagingServicesId: ACe53c252e22cb561c107925bd1c98845f
+  messagingServicesId: ACe53c252e22cb561c107925bd1c98845f
   localDomain: 127.0.0.1 # Domain Twilio can connect back to for calls. Should be domain of your service.
 
 push:
