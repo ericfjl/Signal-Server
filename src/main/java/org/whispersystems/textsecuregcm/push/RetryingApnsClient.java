@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.whispersystems.textsecuregcm.util.Constants;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.security.KeyPair;
@@ -56,11 +57,16 @@ public class RetryingApnsClient {
     for (Map.Entry<String, Metric> entry : metricsListener.getMetrics().entrySet()) {
       metricRegistry.register(name(getClass(), entry.getKey()), entry.getValue());
     }
-
-    this.apnsClient = new ApnsClientBuilder().setClientCredentials(initializeCertificate(apnCertificate),
-                                                                   initializePrivateKey(apnKey), null)
-                                             .setMetricsListener(metricsListener)
-                                             .build();
+    String p12_path = apnCertificate;
+    String password = apnKey;
+    this.apnsClient = new ApnsClientBuilder()
+                        .setClientCredentials( new FileInputStream(p12_path), password )
+                        .setMetricsListener( metricsListener )
+                        .build();
+    // this.apnsClient = new ApnsClientBuilder().setClientCredentials(initializeCertificate(apnCertificate),
+    //                                                                initializePrivateKey(apnKey), null)
+    //                                          .setMetricsListener(metricsListener)
+    //                                          .build();
     this.retryExecutor = initializeExecutor(retryCount);
   }
 

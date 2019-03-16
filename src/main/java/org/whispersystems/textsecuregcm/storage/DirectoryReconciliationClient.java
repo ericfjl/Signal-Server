@@ -29,8 +29,10 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import java.io.ByteArrayInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -74,7 +76,10 @@ public class DirectoryReconciliationClient {
       throws CertificateException
   {
     try {
-      PEMReader       reader      = new PEMReader(new InputStreamReader(new ByteArrayInputStream(caCertificatePem.getBytes())));
+      // PEMReader       reader      = new PEMReader(new InputStreamReader(new ByteArrayInputStream(caCertificatePem.getBytes())));
+      final Reader filereader = new FileReader(caCertificatePem);
+      final PEMReader reader = new PEMReader(filereader);
+      
       X509Certificate certificate = (X509Certificate) reader.readObject();
 
       if (certificate == null) {

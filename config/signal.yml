@@ -7,7 +7,7 @@ twilio: # Twilio gateway configuration
     # - # Third number
     # - # ...
     # - # Nth number
-  # messagingServicesId: ACe53c252e22cb561c107925bd1c98845f
+  # messagingServicesId: 
   localDomain: 127.0.0.1 # Domain Twilio can connect back to for calls. Should be domain of your service.
 
 push:
@@ -44,8 +44,8 @@ directory:
     queueUrl: https://sqs.ap-southeast-1.amazonaws.com      # AWS SQS queue url
   server:
     replicationUrl: https://sqs.ap-southeast-1.amazonaws.com   # CDS replication endpoint base url
-    replicationPassword: ffffff          # CDS replication endpoint password
-    replicationCaCertificate: ffffff     # CDS replication endpoint TLS certificate trust root
+    replicationPassword: 123456          # CDS replication endpoint password
+    replicationCaCertificate: /Users/jlfang/www/opensource/nodejs/keystone-master/test/helpers/certs/server.crt     # CDS replication endpoint TLS certificate trust root
     # reconciliationChunkSize: 1000      # CDS reconciliation chunk size
     # reconciliationChunkIntervalMs: 1000 # CDS reconciliation chunk interval, in milliseconds
 
@@ -94,7 +94,7 @@ database: # Postgresql database configuration
   url: jdbc:postgresql://localhost:5432/accountdb
 
 unidentifiedDelivery:
-  certificate: MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMQ
+  certificate: TTEyMzQ1Njc4OU0xMjM0NTY3ODlNMTIzNDU2Nzg5MDE=
   privateKey: TTEyMzQ1Njc4OU0xMjM0NTY3ODlNMTIzNDU2Nzg5MDE=
   expiresDays: 2
 
@@ -105,7 +105,7 @@ voiceVerification:
 
 apn: # Apple Push Notifications configuration
   bundleId: com.secret.signalTest
-  pushCertificate: /Users/jlfang/Downloads/signal.pem
+  pushCertificate: /Users/jlfang/Downloads/signal.p12
   pushKey: 123456
 
 gcm: # GCM Configuration
