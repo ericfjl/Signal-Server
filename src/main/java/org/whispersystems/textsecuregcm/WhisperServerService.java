@@ -213,7 +213,7 @@ public class WhisperServerService extends Application<WhisperServerConfiguration
     environment.lifecycle().manage(pubSubManager);
     environment.lifecycle().manage(pushSender);
     environment.lifecycle().manage(messagesCache);
-    environment.lifecycle().manage(accountDatabaseCrawler);
+    // environment.lifecycle().manage(accountDatabaseCrawler);
 
     AttachmentController attachmentController = new AttachmentController(rateLimiters, urlSigner);
     KeysController       keysController       = new KeysController(rateLimiters, keys, accountsManager, directoryQueue);
