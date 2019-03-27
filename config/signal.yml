@@ -36,16 +36,16 @@ directory:
     replicaUrls: 
       - http://127.0.0.1:6379
   client: # Configuration for interfacing with Contact Discovery Service cluster
-    userAuthenticationTokenSharedSecret: ffffff # hex-encoded secret shared with CDS used to generate auth tokens for Signal users
-    userAuthenticationTokenUserIdSecret: ffffff # hex-encoded secret shared among Signal-Servers to obscure user phone numbers from CDS
+    userAuthenticationTokenSharedSecret: 06a19fc7e8e34c705fa283af938dfd07 # hex-encoded secret shared with CDS used to generate auth tokens for Signal users
+    userAuthenticationTokenUserIdSecret: cc3d9c86a0409a7aab9240bef0401806 # hex-encoded secret shared among Signal-Servers to obscure user phone numbers from CDS
   sqs:
     accessKey: 624364587793      # AWS SQS accessKey
     accessSecret: secretdev  # AWS SQS accessSecret
     queueUrl: https://sqs.ap-southeast-1.amazonaws.com      # AWS SQS queue url
   server:
-    replicationUrl: https://sqs.ap-southeast-1.amazonaws.com   # CDS replication endpoint base url
+    replicationUrl: http://127.0.0.1:8888   # CDS replication endpoint base url
     replicationPassword: 123456          # CDS replication endpoint password
-    replicationCaCertificate: /Users/jlfang/www/opensource/nodejs/keystone-master/test/helpers/certs/server.crt     # CDS replication endpoint TLS certificate trust root
+    replicationCaCertificate: /home/wire/signal/ContactDiscoveryService/service/config/mock_certificate.pem    # CDS replication endpoint TLS certificate trust root
     # reconciliationChunkSize: 1000      # CDS reconciliation chunk size
     # reconciliationChunkIntervalMs: 1000 # CDS reconciliation chunk interval, in milliseconds
 
@@ -105,7 +105,7 @@ voiceVerification:
 
 apn: # Apple Push Notifications configuration
   bundleId: com.secret.signalTest
-  pushCertificate: /Users/jlfang/Downloads/signal.p12
+  pushCertificate: /home/wire/signal/Signal-Server/config/signal.p12
   pushKey: 123456
 
 gcm: # GCM Configuration

@@ -126,6 +126,9 @@ public class AccountController {
                                 @QueryParam("client")           Optional<String> client)
       throws IOException, RateLimitExceededException
   {
+    if(forwardedFor == null){
+      forwardedFor = "127.0.0.1";
+    }
     if (!Util.isValidNumber(number)) {
       logger.info("Invalid number: " + number);
       throw new WebApplicationException(Response.status(400).build());
