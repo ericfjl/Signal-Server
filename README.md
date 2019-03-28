@@ -6,21 +6,76 @@ Documentation
 
 Looking for protocol documentation? Check out the website!
 
-https://signal.org/docs/
+signal: https://signal.org/docs/
+Introduction to Signal Private Messenger: https://www.youtube.com/watch?v=46ozjP-R2-E
+pdf: https://conference.hitb.org/hitbsecconf2017ams/materials/D2T1%20-%20Markus%20Vervier%20-%20Hunting%20for%20Vulnerabilities%20in%20Signal.pdf
+TextSecure Protocol: https://www.youtube.com/watch?v=7WnwSovjYMs
+install : https://gist.github.com/aqnouch/9a371af0614f4fe706a951c2b97651e7
 
-Cryptography Notice
+
+Notice
 ------------
 
-This distribution includes cryptographic software. The country in which you currently reside may have restrictions on the import, possession, use, and/or re-export to another country, of encryption software.
-BEFORE using any encryption software, please check your country's laws, regulations and policies concerning the import, possession, or use, and re-export of encryption software, to see if this is permitted.
-See <http://www.wassenaar.org/> for more information.
+## Prerequisites
+To be sure to have the latest version of the programmes.
+	sudo apt-get update 
 
-The U.S. Government Department of Commerce, Bureau of Industry and Security (BIS), has classified this software as Export Commodity Control Number (ECCN) 5D002.C.1, which includes information security software using or performing cryptographic functions with asymmetric algorithms.
-The form and manner of this distribution makes it eligible for export under the License Exception ENC Technology Software Unrestricted (TSU) exception (see the BIS Export Administration Regulations, Section 740.13) for both object code and source code.
+### Install Java
+    java --version
+        openjdk version "1.8.0_191"
+    if is openjdk
+        sudo apt remove openjdk*
+    if not install java
+        sudo apt-get install oracle-java8-installer
+
+### Install Redis
+	sudo apt-get install -y redis-server
+
+### Install database
+	sudo apt-get install postgresql postgresql-contrib -y
+    psql -U postgres -h localhost
+    create database abusedb   owner postgres;
+    create database accountdb owner postgres;
+    create database messagedb owner postgres;
+
+### Install Signal-Server
+    git clone https://github.com/ericfjl/Signal-Server.git
+    cd Signal-server
+    (mvn package)/(mvn install -DskipTests)
+    java -jar target/TextSecureServer-2.26.jar abusedb   migrate config/signal_local.yml
+    java -jar target/TextSecureServer-2.26.jar accountdb migrate config/signal_local.yml
+    java -jar target/TextSecureServer-2.26.jar messagedb migrate config/signal_local.yml
+    java -jar target/TextSecureServer-2.26.jar server config/signal_local.yml
+
+
+### fix bugs
+    1.fix bug(can't run for Certificate)org.whispersystems.textsecuregcm.storage.DirectoryReconciliationClient
+      // PEMReader       reader      = new PEMReader(new InputStreamReader(new ByteArrayInputStream(caCertificatePem.getBytes())));
+      final Reader filereader = new FileReader(caCertificatePem);
+      final PEMReader reader = new PEMReader(filereader);
+    2.fix bug(fix package javax.xml.bind.annotation.adapters does not exist) pom.xml
+    https://stackoverflow.com/questions/52502189/java-11-package-javax-xml-bind-does-not-exist
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-core</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+
+
 
 License
 ---------------------
 
-Copyright 2013-2016 Open Whisper Systems
+Copyright 2019-2019 Open Whisper Systems
 
 Licensed under the AGPLv3: https://www.gnu.org/licenses/agpl-3.0.html
