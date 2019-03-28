@@ -4,13 +4,12 @@ Signal-Server
 Documentation
 -------------
 
-Looking for protocol documentation? Check out the website!
-
-signal: https://signal.org/docs/
-Introduction to Signal Private Messenger: https://www.youtube.com/watch?v=46ozjP-R2-E
-pdf: https://conference.hitb.org/hitbsecconf2017ams/materials/D2T1%20-%20Markus%20Vervier%20-%20Hunting%20for%20Vulnerabilities%20in%20Signal.pdf
-TextSecure Protocol: https://www.youtube.com/watch?v=7WnwSovjYMs
-install : https://gist.github.com/aqnouch/9a371af0614f4fe706a951c2b97651e7
+### Looking for protocol documentation? Check out the website!
+    1.signal: https://signal.org/docs/
+    2.Introduction to Signal Private Messenger: https://www.youtube.com/watch?v=46ozjP-R2-E
+    3.pdf: https://conference.hitb.org/hitbsecconf2017ams/materials/D2T1%20-%20Markus%20Vervier%20-%20Hunting%20for%20Vulnerabilities%20in%20Signal.pdf
+    4.TextSecure Protocol: https://www.youtube.com/watch?v=7WnwSovjYMs
+    5.install : https://gist.github.com/aqnouch/9a371af0614f4fe706a951c2b97651e7
 
 
 Notice
