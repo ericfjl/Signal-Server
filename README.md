@@ -37,6 +37,9 @@ To be sure to have the latest version of the programmes.
     create database accountdb owner postgres;
     create database messagedb owner postgres;
 
+### Install Private Contact Discovery Service
+    https://github.com/ericfjl/ContactDiscoveryService
+
 ### Install Signal-Server
     git clone https://github.com/ericfjl/Signal-Server.git
     cd Signal-server
