@@ -18,6 +18,7 @@ package org.whispersystems.textsecuregcm.s3;
 
 import com.amazonaws.HttpMethod;
 import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.regions.Region;
@@ -28,7 +29,11 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.S3ClientOptions;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+
+import org.apache.http.auth.Credentials;
 import org.whispersystems.textsecuregcm.configuration.AttachmentsConfiguration;
+
+import io.dropwizard.auth.basic.BasicCredentials;
 
 import java.net.URL;
 import java.util.Date;
@@ -57,9 +62,10 @@ public class UrlSigner {
     // AmazonS3                    client  = new AmazonS3Client(credentials);
     GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucketName, String.valueOf(attachmentId), method);
     // AmazonS3 client = new AmazonS3Client(new BasicAWSCredentials(this.accessKey,this.accessSecret));
-    AmazonS3 client = AmazonS3ClientBuilder.standard()
+    AmazonS3ClientBuilder builder = AmazonS3ClientBuilder.standard();
+    builder.setCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(this.accessKey, this.accessSecret)));
+    AmazonS3 client = builder
             .withRegion(clientRegion)
-            .withCredentials(new ProfileCredentialsProvider())
             .build();  
     client.setRegion(Region.getRegion(Regions.AP_SOUTHEAST_1)); // 此处根据自己的 s3 地区位置改变
     
