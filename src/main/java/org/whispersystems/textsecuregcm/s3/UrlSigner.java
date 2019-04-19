@@ -21,6 +21,7 @@ import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.regions.Region;
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
@@ -38,35 +39,24 @@ public class UrlSigner {
 
   // private final AWSCredentials credentials;
   // private final String bucket;
-  private final String clientRegion;
   private final String bucketName;
-  private final String sourceKey;
-  private final String destinationKey;
+  private final String accessKey;
+  private final String accessSecret;
 
   public UrlSigner(AttachmentsConfiguration config) {
     // this.credentials = new BasicAWSCredentials(config.getAccessKey(), config.getAccessSecret());
     // this.bucket = config.getBucket();
-    this.clientRegion = "*** Client region ***";
+    // this.clientRegion = "*** Client region ***";
     this.bucketName = config.getBucket();// "*** Bucket name ***";
-    this.sourceKey = config.getAccessKey();// "*** Source object key *** ";
-    this.destinationKey = config.getAccessSecret();// "*** Destination object key ***";
+    this.accessKey = config.getAccessKey();// "*** Source object key *** ";
+    this.accessSecret = config.getAccessSecret();// "*** Destination object key ***";
   }
 
   public URL getPreSignedUrl(long attachmentId, HttpMethod method, boolean unaccelerated) {
     // AmazonS3                    client  = new AmazonS3Client(credentials);
-
-    AmazonS3 client = AmazonS3ClientBuilder.standard()
-    .withCredentials(new ProfileCredentialsProvider())
-    .withRegion(clientRegion)
-    .build();
-
-    // Copy the object into a new object in the same bucket.
-    CopyObjectRequest copyObjRequest = new CopyObjectRequest(bucketName, sourceKey, bucketName, destinationKey);
-    client.copyObject(copyObjRequest);
-
-    // GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucket, String.valueOf(attachmentId), method);
-    GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucketName, this.sourceKey)
-            .withMethod(method);
+    GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucketName, String.valueOf(attachmentId), method);
+    AmazonS3 client = new AmazonS3Client(new BasicAWSCredentials(this.accessKey,this.accessSecret));
+    client.setRegion(Region.getRegion(Regions.AP_SOUTHEAST_1)); // 此处根据自己的 s3 地区位置改变
     
     request.setExpiration(new Date(System.currentTimeMillis() + DURATION));
     request.setContentType("application/octet-stream");
