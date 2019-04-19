@@ -40,13 +40,14 @@ public class UrlSigner {
   // private final AWSCredentials credentials;
   // private final String bucket;
   private final String bucketName;
+  private final String clientRegion;
   private final String accessKey;
   private final String accessSecret;
 
   public UrlSigner(AttachmentsConfiguration config) {
     // this.credentials = new BasicAWSCredentials(config.getAccessKey(), config.getAccessSecret());
     // this.bucket = config.getBucket();
-    // this.clientRegion = "*** Client region ***";
+    this.clientRegion = config.getRegion();//"*** Client region ***";
     this.bucketName = config.getBucket();// "*** Bucket name ***";
     this.accessKey = config.getAccessKey();// "*** Source object key *** ";
     this.accessSecret = config.getAccessSecret();// "*** Destination object key ***";
@@ -55,8 +56,13 @@ public class UrlSigner {
   public URL getPreSignedUrl(long attachmentId, HttpMethod method, boolean unaccelerated) {
     // AmazonS3                    client  = new AmazonS3Client(credentials);
     GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucketName, String.valueOf(attachmentId), method);
-    AmazonS3 client = new AmazonS3Client(new BasicAWSCredentials(this.accessKey,this.accessSecret));
+    // AmazonS3 client = new AmazonS3Client(new BasicAWSCredentials(this.accessKey,this.accessSecret));
+    AmazonS3 client = AmazonS3ClientBuilder.standard()
+            .withRegion(clientRegion)
+            .withCredentials(new ProfileCredentialsProvider())
+            .build();  
     client.setRegion(Region.getRegion(Regions.AP_SOUTHEAST_1)); // 此处根据自己的 s3 地区位置改变
+    
     
     request.setExpiration(new Date(System.currentTimeMillis() + DURATION));
     request.setContentType("application/octet-stream");
