@@ -63,22 +63,21 @@ public class UrlSigner {
     GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucketName, String.valueOf(attachmentId), method);
     // AmazonS3 client = new AmazonS3Client(new BasicAWSCredentials(this.accessKey,this.accessSecret));
     AmazonS3ClientBuilder builder = AmazonS3ClientBuilder.standard();
-    builder.setCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(this.accessKey, this.accessSecret)));
-    AmazonS3 client = builder
-            .withRegion(clientRegion)
-            .build();  
-    client.setRegion(Region.getRegion(Regions.AP_SOUTHEAST_1)); // 此处根据自己的 s3 地区位置改变
-    
+    builder.setCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(this.accessKey, this.accessSecret))); 
     
     request.setExpiration(new Date(System.currentTimeMillis() + DURATION));
     request.setContentType("application/octet-stream");
 
     if (unaccelerated) {
-      client.setS3ClientOptions(S3ClientOptions.builder().setPathStyleAccess(true).build());
+      builder.withPathStyleAccessEnabled(true);
+      // client.setS3ClientOptions(S3ClientOptions.builder().setPathStyleAccess(true).build());
     } else {
-      client.setS3ClientOptions(S3ClientOptions.builder().setAccelerateModeEnabled(true).build());
+      builder.withAccelerateModeEnabled(true);
+      // client.setS3ClientOptions(S3ClientOptions.builder().setAccelerateModeEnabled(true).build());
     }
-
+    AmazonS3 client = builder
+            .withRegion(clientRegion)
+            .build(); 
     return client.generatePresignedUrl(request);
   }
 
