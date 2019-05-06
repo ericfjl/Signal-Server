@@ -45,10 +45,41 @@ $ sudo apt-get update
     $ java -jar target/TextSecureServer-2.26.jar abusedb   migrate config/signal_local.yml
     $ java -jar target/TextSecureServer-2.26.jar accountdb migrate config/signal_local.yml
     $ java -jar target/TextSecureServer-2.26.jar messagedb migrate config/signal_local.yml
+
+### Install coturn
+    $ apt-get install coturn
+
+    config :
+        编辑配置文件turnserver.conf：(只需启用和修改下面几项)
+
+        external-ip=54.249.95.226/172.31.43.68 （前者为服务器公网ip,后者为内网IP）
+
+        fingerprint （开启指纹）
+
+        lt-cred-mech （开启长期验证机制）
+
+        use-auth-secret  （开启secret形式授权 ）
+
+        static-auth-secret=12345（# 设置secret，这个和signal服务配置文件里的turnserver的secret要一致，最好复杂点,注意最后别留空格）
+
+        signal 服务器配置文件中的相关配置：
+
+        turn: # TURN server configuration
+          secret: 12345 # TURN server secret
+          uris: 
+            - stun:54.249.95.226:3478
+            - stun:54.249.95.226:5349 # 5349是tls的，相当于443
+            - turn:54.249.95.226:3478?transport=udp
+            - turn:54.249.95.226:5349?transport=udp
+    
+- [github](https://github.com/coturn/coturn)
+- [install help](https://www.jianshu.com/p/49920993b0a7)
+- [config help](https://blog.csdn.net/woshiwangbiao/article/details/85344357)
+
 ### Running the service
     $ java -jar target/TextSecureServer-2.26.jar server config/signal_local.yml
 
-## fix https://github.com/signalapp/Signal-Server 's bugs 
+## fix [signalapp/Signal-Server](https://github.com/signalapp/Signal-Server) 's bugs 
 
 ### fix bug(can't run for Certificate)org.whispersystems.textsecuregcm.storage.DirectoryReconciliationClient)
 `````
