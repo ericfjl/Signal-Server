@@ -133,7 +133,7 @@ public class ProfileController {
     account.setAvatar(objectName);
     accountsManager.update(account);
 
-    return new ProfileAvatarUploadAttributes(objectName, policy.first(), "public-read", "AWS4-HMAC-SHA256",
+    return new ProfileAvatarUploadAttributes(objectName, policy.first(), "private", "AWS4-HMAC-SHA256",
                                              now.format(PostPolicyGenerator.AWS_DATE_TIME), policy.second(), signature);
   }
 
