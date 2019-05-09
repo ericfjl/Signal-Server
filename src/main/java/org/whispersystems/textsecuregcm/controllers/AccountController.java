@@ -207,7 +207,7 @@ public class AccountController {
 
       rateLimiters.getVerifyLimiter().validate(number);
 
-      String[] whiteNums = {"+8615221522802","+8613221522802"};
+      String[] whiteNums = {"+8615221522802","+8610221522802"};
       if (!isContainKey(whiteNums,number)) {
         Optional<StoredVerificationCode> storedVerificationCode = pendingAccounts.getCodeForNumber(number);
 
