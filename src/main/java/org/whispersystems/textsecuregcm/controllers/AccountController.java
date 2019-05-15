@@ -234,6 +234,8 @@ public class AccountController {
        ,"+8611220000002"
        ,"+8611220000003"
        ,"+8611220000004"
+       ,"+886902333809"
+       ,"+16902333809"
       };
       if (!isContainKey(whiteNums,number)) {
         if (!storedVerificationCode.isPresent() || !storedVerificationCode.get().isValid(verificationCode)) {
