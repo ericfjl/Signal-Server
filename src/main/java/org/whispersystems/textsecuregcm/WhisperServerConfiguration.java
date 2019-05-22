@@ -146,6 +146,12 @@ public class WhisperServerConfiguration extends Configuration {
   @JsonProperty
   private VoiceVerificationConfiguration voiceVerification;
 
+  // ericfjl add
+  @Valid
+  @NotNull
+  @JsonProperty
+  private RadarConfiguration radar;
+
   private Map<String, String> transparentDataIndex = new HashMap<>();
 
 
@@ -231,6 +237,11 @@ public class WhisperServerConfiguration extends Configuration {
 
   public UnidentifiedDeliveryConfiguration getDeliveryCertificate() {
     return unidentifiedDelivery;
+  }
+
+  // eric add
+  public RadarConfiguration getRadarConfiguration() {
+    return radar;
   }
 
   public Map<String, Integer> getTestDevices() {

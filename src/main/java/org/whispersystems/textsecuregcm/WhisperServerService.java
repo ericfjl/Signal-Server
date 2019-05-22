@@ -38,6 +38,7 @@ import org.whispersystems.textsecuregcm.controllers.KeysController;
 import org.whispersystems.textsecuregcm.controllers.MessageController;
 import org.whispersystems.textsecuregcm.controllers.ProfileController;
 import org.whispersystems.textsecuregcm.controllers.ProvisioningController;
+import org.whispersystems.textsecuregcm.controllers.WalletController;
 import org.whispersystems.textsecuregcm.controllers.VoiceVerificationController;
 import org.whispersystems.textsecuregcm.controllers.TransparentDataController;
 import org.whispersystems.textsecuregcm.limits.RateLimiters;
@@ -59,6 +60,7 @@ import org.whispersystems.textsecuregcm.push.GCMSender;
 import org.whispersystems.textsecuregcm.push.PushSender;
 import org.whispersystems.textsecuregcm.push.ReceiptSender;
 import org.whispersystems.textsecuregcm.push.WebsocketSender;
+import org.whispersystems.textsecuregcm.wallet.*;
 import org.whispersystems.textsecuregcm.redis.ReplicatedJedisPool;
 import org.whispersystems.textsecuregcm.s3.UrlSigner;
 import org.whispersystems.textsecuregcm.sms.SmsSender;
@@ -208,6 +210,11 @@ public class WhisperServerService extends Application<WhisperServerConfiguration
 
     messagesCache.setPubSubManager(pubSubManager, pushSender);
 
+    // ericfjl add 
+    WalletClient WalletClient = new WalletClient(config.getRadarConfiguration());
+    WalletClientManager WalletClientManager = new WalletClientManager(WalletClient);
+    WalletController walletController = new WalletController(WalletClientManager);
+
     apnSender.setApnFallbackManager(apnFallbackManager);
     environment.lifecycle().manage(apnFallbackManager);
     environment.lifecycle().manage(pubSubManager);
@@ -236,6 +243,7 @@ public class WhisperServerService extends Application<WhisperServerConfiguration
     environment.jersey().register(keysController);
     environment.jersey().register(messageController);
     environment.jersey().register(profileController);
+    environment.jersey().register(walletController);//add by ericfjl
 
     ///
     WebSocketEnvironment webSocketEnvironment = new WebSocketEnvironment(environment, config.getWebSocketConfiguration(), 90000);
