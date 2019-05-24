@@ -16,6 +16,8 @@
  */
 package org.whispersystems.textsecuregcm.configuration;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -37,4 +39,55 @@ public class RadarConfiguration {
   public String getMd5Key() {
     return md5key;
   }
+
+  @JsonProperty
+  @NotEmpty
+  private List<String> coinIcons;
+
+  public List<String> getCoinIcons(){
+    return coinIcons;
+  }
+
+  @NotEmpty
+  @JsonProperty
+  private String targetCur1;
+
+  public String getTargetCur1() {
+    return targetCur1;
+  }
+
+
+  @NotEmpty
+  @JsonProperty
+  private String targetIssuer1;
+
+  public String getTargetIssuer1() {
+    return targetIssuer1;
+  }
+
+  @NotEmpty
+  @JsonProperty
+  private String targetCur2;
+
+  public String getTargetCur2() {
+    return targetCur2;
+  }
+
+
+  @NotEmpty
+  @JsonProperty
+  private String targetIssuer2;
+
+  public String getTargetIssuer2() {
+    return targetIssuer2;
+  }
+
+  @NotEmpty
+  @JsonProperty
+  private String rate2;
+
+  public String getRate2() {
+    return rate2;
+  }
+
 }

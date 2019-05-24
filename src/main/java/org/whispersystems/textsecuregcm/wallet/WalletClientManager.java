@@ -21,26 +21,48 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.assertj.core.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.whispersystems.textsecuregcm.configuration.RadarConfiguration;
+import org.whispersystems.textsecuregcm.entities.CoinInfo;
 
-public class WalletClientManager {
+import io.dropwizard.lifecycle.Managed;
+
+public class WalletClientManager implements Managed{
   private final WalletClient client;
   private final Logger logger = LoggerFactory.getLogger(WalletClient.class);
-  Map hMap = new HashMap();
-  private final String cur1;
-  private final String issuer1;
-  // List coins = new ArrayList<>();
+  private final RadarConfiguration config;
+  private HashMap<String,CoinInfo> coinMap = new HashMap<String,CoinInfo>();
+  private ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
-  public WalletClientManager(WalletClient client) {
+  public WalletClientManager(WalletClient client,RadarConfiguration config) {
     this.client = client;
-    hMap.put("VRP", "https://cdn.iradar.org/icon_rad.png");
-    cur1 = "USD";
-    issuer1 = "rH4XBcbU8aYkCTiiRBpmhjXHpKABHbqUKz";
+    this.config = config;
+    setCoinInfos(config.getCoinIcons());
+  }
 
-    // coins.add("VRP");
+  private void setCoinInfos(List<String> coins){
+
+    for (String coin : coins) {
+      if(Strings.isNullOrEmpty(coin))
+      {
+        logger.error("config errror ... radar-coinIcons ! ");
+        continue;
+      }
+      String[] list = coin.split(",");
+      if(list == null || list.length <6){
+        logger.error("config errror ... radar-coinIcons ! " + coin);
+        continue;
+      }
+
+      coinMap.put(list[0], new CoinInfo(list[0], list[1], list[2],list[3],list[4],Float.valueOf(list[5])));
+    }
   }
 
   // 3.1 根据手机获取账号列表
@@ -82,34 +104,21 @@ public class WalletClientManager {
     if(!"success".equals(info.getStatus())){
       return info;
     }
-    List list = (ArrayList) info.getResult();
-    List result = new ArrayList<>();
+    List<LinkedHashMap> list = (ArrayList) info.getResult();
+    List<Object> result = new ArrayList<>();
     
     for (int i =0;i<list.size();i++){
-      Map map = (LinkedHashMap) list.get(i);
-      String currency = map.get("currency").toString();
-      if(!hMap.containsKey(currency)){
+      LinkedHashMap<String,Object> map = list.get(i);
+      String currency = String.valueOf(map.get("currency"));
+      if(!coinMap.containsKey(currency)){
         continue;
       }
-      Map retMap = new LinkedHashMap();
-      String issuer2 = "RADR";
-      if(!"VRP".equals(currency) && !"VBC".equals(currency))
-      {
-        issuer2 = String.valueOf(map.get("issuer"));
-      }
-      WalletCommData rateInfo = client.getChartsLatest(cur1, issuer1, currency, issuer2);
-      String rate = "0.0";
-      if("success".equals(rateInfo.getStatus())){
-        Map rateMap = (LinkedHashMap) rateInfo.getResult();
-        rate =  String.valueOf(rateMap.get("value"));
-      }else{
-        printError(rateInfo,"getChartsLatest api");
-      }
+      LinkedHashMap<String,Object> retMap = new LinkedHashMap<String,Object>();
 
       retMap.put("balance", map.get("balance"));
       retMap.put("currency", currency);
-      retMap.put("rate", rate);
-      retMap.put("icon",hMap.get(currency));
+      retMap.put("rate", coinMap.get(currency).getRate());
+      retMap.put("icon",coinMap.get(currency).getIcon());
       result.add(retMap);
       
     }
@@ -164,6 +173,56 @@ public class WalletClientManager {
   private void printError(WalletCommData info,String name){
 
     logger.error(String.format("%s:status=%s,date=%s",name, info.getStatus(),info.getData().toString()));
+  }
+
+  private void updateRates(){
+
+    Float cnyRate = getRate("CNY",coinMap.get("CNY").getIssuer(),"USD", coinMap.get("USD").getIssuer());
+    for(Map.Entry<String, CoinInfo> entry : coinMap.entrySet()) {
+      String key = entry.getKey();
+      CoinInfo info = entry.getValue();
+
+      Float rate = getRate(info.getTargetCurrency(),info.getTargetIssuer(),info.getCurrency(), info.getIssuer());
+      if("CNY".equals(info.getTargetCurrency())){//人民币换算成美元
+        rate = rate/info.getTargetRate();
+      }
+      info.setRate(rate);
+    }
+    
+  }
+
+  private Float getRate(String targetCur,String targetIssuer,String cur,String issuer){
+    WalletCommData rateInfo = client.getChartsLatest(targetCur,targetIssuer,cur,issuer);
+    if("success".equals(rateInfo.getStatus())){
+      Map rateMap = (LinkedHashMap) rateInfo.getResult();
+      Float rate = Float.parseFloat(String.valueOf(rateMap.get("value")));
+      return rate;
+    }else{
+      printError(rateInfo,String.format("getRate api %s,%s,%s,%s",targetCur, targetIssuer, cur, issuer));
+    }
+    return 0.0f;
+  }
+
+  @Override
+  public void start() throws Exception {
+    long delay  = 1000L;
+    long period = 1000 * 10L;
+    TimerTask task = new TimerTask(){
+      int count =0;
+      @Override
+      public void run() {
+        logger.info(String.format("===== TimerTask =====%d", count++));
+        updateRates();
+      }
+    };
+
+    executor.scheduleAtFixedRate(task, delay, period, TimeUnit.MILLISECONDS);
+    Thread.sleep(delay + period * 3);
+  }
+
+  @Override
+  public void stop() throws Exception {
+    executor.shutdown();
   }
 
 }

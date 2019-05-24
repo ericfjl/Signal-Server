@@ -212,7 +212,7 @@ public class WhisperServerService extends Application<WhisperServerConfiguration
 
     // ericfjl add 
     WalletClient WalletClient = new WalletClient(config.getRadarConfiguration());
-    WalletClientManager WalletClientManager = new WalletClientManager(WalletClient);
+    WalletClientManager WalletClientManager = new WalletClientManager(WalletClient,config.getRadarConfiguration());
     WalletController walletController = new WalletController(WalletClientManager);
 
     apnSender.setApnFallbackManager(apnFallbackManager);
@@ -220,6 +220,7 @@ public class WhisperServerService extends Application<WhisperServerConfiguration
     environment.lifecycle().manage(pubSubManager);
     environment.lifecycle().manage(pushSender);
     environment.lifecycle().manage(messagesCache);
+    environment.lifecycle().manage(WalletClientManager);
     // environment.lifecycle().manage(accountDatabaseCrawler);
 
     AttachmentController attachmentController = new AttachmentController(rateLimiters, urlSigner);
