@@ -48,46 +48,5 @@ public class RadarConfiguration {
     return coinIcons;
   }
 
-  @NotEmpty
-  @JsonProperty
-  private String targetCur1;
-
-  public String getTargetCur1() {
-    return targetCur1;
-  }
-
-
-  @NotEmpty
-  @JsonProperty
-  private String targetIssuer1;
-
-  public String getTargetIssuer1() {
-    return targetIssuer1;
-  }
-
-  @NotEmpty
-  @JsonProperty
-  private String targetCur2;
-
-  public String getTargetCur2() {
-    return targetCur2;
-  }
-
-
-  @NotEmpty
-  @JsonProperty
-  private String targetIssuer2;
-
-  public String getTargetIssuer2() {
-    return targetIssuer2;
-  }
-
-  @NotEmpty
-  @JsonProperty
-  private String rate2;
-
-  public String getRate2() {
-    return rate2;
-  }
 
 }
