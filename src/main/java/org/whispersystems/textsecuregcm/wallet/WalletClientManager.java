@@ -211,7 +211,7 @@ public class WalletClientManager implements Managed{
       int count =0;
       @Override
       public void run() {
-        logger.info(String.format("===== TimerTask =====%d", count++));
+        // logger.info(String.format("===== TimerTask =====%d", count++));
         updateRates();
       }
     };
