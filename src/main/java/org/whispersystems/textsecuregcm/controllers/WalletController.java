@@ -1,6 +1,8 @@
 package org.whispersystems.textsecuregcm.controllers;
 
 import java.io.IOException;
+import java.util.List;
+
 import javax.validation.Valid;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -17,6 +19,7 @@ import org.assertj.core.internal.bytebuddy.implementation.bytecode.Throw;
 import org.whispersystems.textsecuregcm.entities.ProvisioningMessage;
 import org.whispersystems.textsecuregcm.storage.Account;
 import org.whispersystems.textsecuregcm.wallet.WalletClientManager;
+import org.whispersystems.textsecuregcm.wallet.WalletCommData;
 
 import io.dropwizard.auth.Auth;
 
@@ -34,7 +37,7 @@ public class WalletController {
   @GET
   @Path("account_list/")
   @Produces(MediaType.APPLICATION_JSON)
-  public String getAccountList(
+  public WalletCommData getAccountList(
                                 //  @Auth                            Account account,
                                  @QueryParam("phoneCode")         String phoneCode,
                                  @QueryParam("phoneNumber")       String phoneNumber,
@@ -51,7 +54,7 @@ public class WalletController {
   @GET
   @Path("walletinfo/")
   @Produces(MediaType.APPLICATION_JSON)
-  public String getWalletInfo(
+  public WalletCommData getWalletInfo(
                                 //  @Auth                            Account account,
                                  @QueryParam("accountName")         String accountName,
                                  @Valid                           ProvisioningMessage message
@@ -67,7 +70,7 @@ public class WalletController {
   @POST
   @Path("register/")
   @Produces(MediaType.APPLICATION_JSON)
-  public String register(
+  public WalletCommData register(
                                 //  @Auth                            Account account,
                                  @QueryParam("phoneCode")         String phoneCode,
                                  @QueryParam("phoneNumber")       String phoneNumber,
@@ -84,7 +87,7 @@ public class WalletController {
   @GET
   @Path("balance/")
   @Produces(MediaType.APPLICATION_JSON)
-  public String getBalance(
+  public WalletCommData getBalance(
                                 //  @Auth                            Account account,
                                  @QueryParam("address")         String address,
                                  @Valid                         ProvisioningMessage message
@@ -100,7 +103,7 @@ public class WalletController {
   @POST
   @Path("sms_code/")
   @Produces(MediaType.APPLICATION_JSON)
-  public String getSmsCode(
+  public WalletCommData getSmsCode(
                                 //  @Auth                            Account account,
                                  @QueryParam("address")         String address,
                                  @QueryParam("phoneCode")       String phoneCode,
@@ -118,7 +121,7 @@ public class WalletController {
   @POST
   @Path("make_tx/")
   @Produces(MediaType.APPLICATION_JSON)
-  public String makeTx(
+  public WalletCommData makeTx(
                                 //  @Auth                            Account account,
                                  @QueryParam("address")           String address,
                                  @QueryParam("destination")       String destination,
@@ -139,7 +142,7 @@ public class WalletController {
   @POST
   @Path("set_google_auth/")
   @Produces(MediaType.APPLICATION_JSON)
-  public String setGoogleAuth(
+  public WalletCommData setGoogleAuth(
                                 //  @Auth                            Account account,
                                  @QueryParam("address")         String address,
                                  @QueryParam("flag")            int flag,
@@ -157,7 +160,7 @@ public class WalletController {
   @POST
   @Path("confirm_google_auth/")
   @Produces(MediaType.APPLICATION_JSON)
-  public String confirmGoogleAuth(
+  public WalletCommData confirmGoogleAuth(
                                 //  @Auth                          Account account,
                                  @QueryParam("address")         String address,
                                  @QueryParam("verifyCode")      String verifyCode,
@@ -178,12 +181,13 @@ public class WalletController {
                                 //  @Auth                            Account account,
                                  @QueryParam("address")         String address,
                                  @QueryParam("marker")          String marker,
+                                 @QueryParam("coinType")        String coinType,
                                  @Valid                         ProvisioningMessage message
                                 )
       throws IOException
   {
     // checkAuth(account);  
-    return manager.getTxHistory(address,marker);
+    return manager.getTxHistory(address,marker,coinType);
   }
 
   // 
@@ -192,7 +196,7 @@ public class WalletController {
   @GET
   @Path("charts/latest/")
   @Produces(MediaType.APPLICATION_JSON)
-  public String getChatsLatest(
+  public WalletCommData getChatsLatest(
                                 //  @Auth                            Account account,
                                  @QueryParam("cur1")             String cur1,
                                  @QueryParam("issuer1")          String issuer1,

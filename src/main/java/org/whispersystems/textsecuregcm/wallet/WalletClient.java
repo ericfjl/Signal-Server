@@ -29,32 +29,33 @@ public class WalletClient {
   }
 
   // 3.1 根据手机获取账号列表
-  public String getAccounts(String phoneCode,String phoneNumber) {
+  public WalletCommData getAccounts(String phoneCode,String phoneNumber) {
 
-    String accounts = client
+    WalletCommData info = client
                       .target(radarUrl)
                       .path("/api/im/account_list")
                       .queryParam("phoneCode", phoneCode)
                       .queryParam("phoneNumber", phoneNumber)
                       .request()
-                      .get(String.class);
-    return accounts;
+                      .get(WalletCommData.class);
+    
+    return info;
   }
 
-  // 3.2 根据昵称/email/钱包查询账号
-  public String getWalletinfo(String accountName) {
+  // 3.2 账号余额查询:根据昵称/email/钱包
+  public WalletCommData getWalletinfo(String accountName) {
 
-    String info = client
+    WalletCommData info = client
                       .target(radarUrl)
                       .path("/api/im/check")
                       .queryParam("accountName", accountName)
                       .request()
-                      .get(String.class);
+                      .get(WalletCommData.class);
     return info;
   }
 
   // 3.3 注册
-  public String register(String phoneCode,String phoneNumber){
+  public WalletCommData register(String phoneCode,String phoneNumber){
     Timestamp timestamp = new Timestamp(System.currentTimeMillis());
     long longStamp = timestamp.getTime();
     String sign = getSign(String.format("%s%s%d%s", phoneCode,phoneNumber,longStamp,this.md5Key));
@@ -67,18 +68,18 @@ public class WalletClient {
                       .queryParam("sign", sign)
                       .request()
                       .post(null);
-    return response.readEntity(String.class);
+    return response.readEntity(WalletCommData.class);
   }
 
   // 3.4 用户余额
-  public String getBalance(String address) {
+  public WalletCommData getBalance(String address) {
 
-    String info =   client
+    WalletCommData info =   client
                       .target(radarUrl)
                       .path("/api/im/balance")
                       .queryParam("address", address)
                       .request()
-                      .get(String.class);
+                      .get(WalletCommData.class);
     return info;
   }
 
@@ -89,7 +90,7 @@ public class WalletClient {
    * @param phoneNumber 手机号
    * @return 
    */
-  public String getSmsCode(String address,String phoneCode,String phoneNumber){
+  public WalletCommData getSmsCode(String address,String phoneCode,String phoneNumber){
     Timestamp timestamp = new Timestamp(System.currentTimeMillis());
     long longStamp = timestamp.getTime();
     String sign = "";
@@ -109,7 +110,7 @@ public class WalletClient {
                       .queryParam("sign", sign)
                       .request()
                       .post(null);
-    return response.readEntity(String.class);
+    return response.readEntity(WalletCommData.class);
   }
 
   /**
@@ -122,7 +123,7 @@ public class WalletClient {
    * @param issuer 货币网关地址(VRP 或者 VBC 传"RADR"即可，否则传具体网关地
    * @return
    */
-  public String makeTx(String address,String destination,String currency,String amount,String password,String issuer){
+  public WalletCommData makeTx(String address,String destination,String currency,String amount,String password,String issuer){
     Timestamp timestamp = new Timestamp(System.currentTimeMillis());
     long longStamp = timestamp.getTime();
     String sign = getSign(String.format("%s%s%s%s%s%d%s", address,destination,currency,issuer,amount,longStamp,this.md5Key));
@@ -139,7 +140,7 @@ public class WalletClient {
                       .queryParam("sign", sign)
                       .request()
                       .post(null);
-    return response.readEntity(String.class);
+    return response.readEntity(WalletCommData.class);
   }
 
   // 3.8 获取 google_auth 密钥(开启 google auth 第一步)
@@ -150,7 +151,7 @@ public class WalletClient {
       o password :密码，可能是支付密码/手机短信/GA。 根据用户安全设置来 
       o sign: MD5(address + flag + timestamp + signKey)
      */
-  public String setGoogleAuth(String address,int flag,String password){
+  public WalletCommData setGoogleAuth(String address,int flag,String password){
     Timestamp timestamp = new Timestamp(System.currentTimeMillis());
     long longStamp = timestamp.getTime();
     String sign = getSign(String.format("%s%d%d%s", address,flag,longStamp,this.md5Key));
@@ -164,7 +165,7 @@ public class WalletClient {
                       .queryParam("sign", sign)
                       .request()
                       .post(null);
-    return response.readEntity(String.class);
+    return response.readEntity(WalletCommData.class);
   }
 
   /**
@@ -174,7 +175,7 @@ public class WalletClient {
     * 
     * @return
   */
-  public String confirmGoogleAuth(String address,String verifyCode){
+  public WalletCommData confirmGoogleAuth(String address,String verifyCode){
     Timestamp timestamp = new Timestamp(System.currentTimeMillis());
     long longStamp = timestamp.getTime();
     String sign = getSign(String.format("%s%s%d%s", address,verifyCode,longStamp,this.md5Key));
@@ -187,7 +188,7 @@ public class WalletClient {
                       .queryParam("sign", sign)
                       .request()
                       .post(null);
-    return response.readEntity(String.class);
+    return response.readEntity(WalletCommData.class);
   }
 
   /**
@@ -214,9 +215,9 @@ public class WalletClient {
   }
 
   // charts/latest/
-  public String getChartsLatest(String cur1,String issuer1,String cur2,String issuer2) {
+  public WalletCommData getChartsLatest(String cur1,String issuer1,String cur2,String issuer2) {
 
-    String info =   client
+    WalletCommData info =   client
                       .target("https://c.radarlab.org")
                       .path("/api/charts/latest")
                       .queryParam("cur1", cur1)
@@ -224,7 +225,7 @@ public class WalletClient {
                       .queryParam("cur2", cur2)
                       .queryParam("issuer2", issuer2)
                       .request()
-                      .get(String.class);  
+                      .get(WalletCommData.class);  
     return info;
   }
   private String getSign(String str){
