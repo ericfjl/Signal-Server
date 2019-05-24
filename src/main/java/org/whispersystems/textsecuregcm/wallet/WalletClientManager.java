@@ -119,8 +119,8 @@ public class WalletClientManager implements Managed{
       retMap.put("currency", currency);
       retMap.put("rate", coinMap.get(currency).getRate());
       retMap.put("icon",coinMap.get(currency).getIcon());
+      retMap.put("issuer",coinMap.get(currency).getIssuer());
       result.add(retMap);
-      
     }
     info.setResult(result);
     
