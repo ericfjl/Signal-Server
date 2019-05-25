@@ -228,6 +228,25 @@ public class WalletController {
     return manager.getChartsLatest(cur1, issuer1, cur2, issuer2);
   }
 
+  // getTxHistory2
+  // 3.11 交易历史
+  @Timed
+  @GET
+  @Path("tx_history2/")
+  @Produces(MediaType.APPLICATION_JSON)
+  public String getTxHistory2(
+                                //  @Auth                            Account account,
+                                 @QueryParam("address")         String address,
+                                 @QueryParam("marker")          String marker,
+                                 @QueryParam("coinType")        String coinType,
+                                 @Valid                         ProvisioningMessage message
+                                )
+      throws IOException
+  {
+    // checkAuth(account);  
+    return manager.getTxHistory2(address,marker,coinType);
+  }
+
   private void checkAuth(Account account)throws IOException{
 
     // if (!account.isPresent() ) {

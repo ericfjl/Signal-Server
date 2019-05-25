@@ -219,24 +219,32 @@ public class WalletClient {
    * @param marker 翻页(不传默认第一页,是个 json，每次接口会返回 maker，下一页传该值即可)
    * @return 
    */
-  public String getTxHistory(String address,String marker) {
+  public Response getTxHistory(String address,String marker) {
 
     String jsonStr = "";
     if(!Strings.isNullOrEmpty(marker)){
         jsonStr = marker.replaceAll("\\{", "%7B").replaceAll("\\}", "%7D");
     } 
-    String info =   client
+    Response response = client
                       .target(radarUrl)
                       .path("/api/im/tx_history")
                       .queryParam("address", address)
                       .queryParam("marker", jsonStr)
                       .resolveTemplate("marker", String.format("{\"api/im/tx_history\":%s}", jsonStr))
                       .request()
-                      .get(String.class);  
-    return info;
+                      .get();
+    return response;
   }
 
   // charts/latest/
+  /**
+   * 3.12 汇率 
+   * @param cur1 货币代号1
+   * @param issuer1 网关1
+   * @param cur2 货币代号2
+   * @param issuer2 网关2
+   * @return 价格默认以currency2位目标货币,currency1为价格货币.例如获取VBC价格,需要将CNY放在第一位,VBC放在第二位
+   */
   public WalletCommData getChartsLatest(String cur1,String issuer1,String cur2,String issuer2) {
 
     WalletCommData info =   client
@@ -250,6 +258,7 @@ public class WalletClient {
                       .get(WalletCommData.class);  
     return info;
   }
+  
   private String getSign(String str){
     logger.info("md5 before =" + str);
     try {
