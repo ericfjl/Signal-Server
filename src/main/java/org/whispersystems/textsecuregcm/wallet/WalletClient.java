@@ -192,6 +192,28 @@ public class WalletClient {
   }
 
   /**
+   * 3.10 验证用户权限(绑定用户的时候使用) sign: MD5(accountName + timestamp + signKey)
+   * @param address 昵称/钱包地址/邮箱
+   * @param password 转账密码，可能是支付密码/手机短信/GA。 根据用户安全设置来
+   * @return
+   */
+  public WalletCommData verify(String accountName,String password){
+    Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+    long longStamp = timestamp.getTime();
+    String sign = getSign(String.format("%s%d%s", accountName,longStamp,this.md5Key));
+    WalletCommData response = client
+                      .target(radarUrl)
+                      .path("/api/im/verify")
+                      .queryParam("accountName", accountName)
+                      .queryParam("password", password)
+                      .queryParam("timestamp", longStamp)
+                      .queryParam("sign", sign)
+                      .request()
+                      .get(WalletCommData.class);
+    return response;
+  }
+
+  /**
    * 3.11 交易历史
    * @param address 钱包地址
    * @param marker 翻页(不传默认第一页,是个 json，每次接口会返回 maker，下一页传该值即可)

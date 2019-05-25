@@ -148,6 +148,10 @@ public class WalletClientManager implements Managed{
   }
 
   //
+  public WalletCommData verify(String accountName,String password){
+    return client.verify(accountName, password);
+  }
+  //
   public String getTxHistory(String address,String marker,String coinType) {
     String str = client.getTxHistory(address,marker);
     if(!Strings.isNullOrEmpty(str) && str.contains("error_code")){

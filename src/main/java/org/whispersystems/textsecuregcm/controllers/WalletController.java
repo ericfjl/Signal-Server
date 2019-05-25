@@ -172,6 +172,24 @@ public class WalletController {
     return manager.confirmGoogleAuth(address,verifyCode);
   }
 
+
+  // 3.10 验证用户权限(绑定用户的时候使用)
+  @Timed
+  @GET
+  @Path("verify/")
+  @Produces(MediaType.APPLICATION_JSON)
+  public WalletCommData verfy(
+                                //  @Auth                          Account account,
+                                 @QueryParam("accountName")     String accountName,
+                                 @QueryParam("password")        String password,
+                                 @Valid                         ProvisioningMessage message
+                                )
+      throws IOException
+  {
+    // checkAuth(account); 
+    return manager.verify(accountName, password);
+  }
+
   // 3.11 交易历史
   @Timed
   @GET
