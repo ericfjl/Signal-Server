@@ -17,13 +17,16 @@ public class OrderInfo implements Principal {
     private int type;//0:收款;1:付款;2:手续费;3:其他
 
     @JsonProperty
-    private Float amount;//交易金额
+    private String amount;//交易金额
 
     @JsonProperty
     private String currency;//币种
 
     @JsonProperty
     private String otherAddr;//交易对方的钱包地址
+
+    @JsonProperty
+    private String hash;//交易hash
     
 
     public OrderInfo() {
@@ -59,11 +62,11 @@ public class OrderInfo implements Principal {
         this.type = type;
     }
 
-    public Float getAmount() {
+    public String getAmount() {
         return amount;
     }
 
-    public void setAmount(Float amount) {
+    public void setAmount(String amount) {
         this.amount = amount;
     }
 
@@ -81,6 +84,14 @@ public class OrderInfo implements Principal {
 
     public void setOtherAddr(String otherAddr) {
         this.otherAddr = otherAddr;
+    }
+
+    public String getHash() {
+        return hash;
+    }
+
+    public void setHash(String hash) {
+        this.hash = hash;
     }
 
 

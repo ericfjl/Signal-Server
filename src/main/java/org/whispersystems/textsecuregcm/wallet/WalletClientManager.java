@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -112,7 +113,7 @@ public class WalletClientManager implements Managed {
 
     for (int i = 0; i < list.size(); i++) {
       LinkedHashMap<String, Object> map = list.get(i);
-      String currency = String.valueOf(map.get("currency"));
+      String currency = obj2String(map.get("currency"));
       if (!coinMap.containsKey(currency)) {
         continue;
       }
@@ -166,17 +167,26 @@ public class WalletClientManager implements Managed {
 
   private Long formatDate(LinkedTreeMap<String, Object> data)
   {
-    Long date = Long.parseLong(String.valueOf(data.get("date")));
+    Long date = Long.parseLong(Objects.toString(data.get("date"),"0"));
     date = date + 946656000L + 8 * 60 * 60;
     return date;
   }
 
-  //0:收款;1:付款;2:手续费;3:其他
+  
+  /**
+   * //0:收款;1:付款;2:手续费;3:创建挂单;4:挂单完全成交;5:挂单部分成交;6.取消挂单;100.其他
+   * 1. 挂单完全成交    --> 4 挂单完全成交
+   * 2. 挂单部分成交    --> 5 挂单部分成交 
+   * 3. 创建挂单       --> 3 创建挂单
+   * 4. 取消挂单       --> 6 取消挂单
+   * 5. 发送          --> 1 付款 
+   * 6. 接收          --> 0 收款 
+   */
   private List<String> sents = Arrays.asList("active_show", "sent");
   private List<String> recis = Arrays.asList("active_acc", "received");
-  private int getType(LinkedTreeMap<String, Object> data){
+  private int getType(LinkedTreeMap<String, Object> data,LinkedTreeMap<String, Object> effect){
     
-    String type = String.valueOf(data.get("type"));
+    String type = obj2String(data.get("type"));
     if(recis.contains(type))
     {
       return 0;
@@ -184,8 +194,22 @@ public class WalletClientManager implements Managed {
     if(sents.contains(type)){
       return 1;
     }
+    if(effect != null){
+      if("fee".equals(effect.get("type"))) return 2;
+    }
+    if("offer_cancelled".equals(type)) return 6;
+    if("offercreate".equals(type))
+    {
+      String offerStatus = obj2String(data.get("OfferStatus"));
+      if("offer_funded".equals(offerStatus)) return 4;
+      if("offer_partially_funded".equals(offerStatus)) return 5;
+      if("offer_create".equals(offerStatus)) return 3;
+      // 挂单全部成交:offer_funded 
+      // 挂单部分成交: offer_partially_funded 
+      // 创建挂单:offer_create 
+    }
 
-    return 3;
+    return 100;
   }
   
   public String getTxHistory2(String address, String marker, String coinType) {
@@ -202,19 +226,24 @@ public class WalletClientManager implements Managed {
     for (Object obj : transactions) {
       LinkedTreeMap<String, Object> data = (LinkedTreeMap) obj;
       Long date = formatDate(data);
-      int type = getType(data);
-      String sender = String.valueOf(data.get("sender"));
-      String recipient = String.valueOf(data.get("recipient"));
+      
+      String sender = obj2String(data.get("sender"));
+      String recipient = obj2String(data.get("recipient"));
       String otherAddr = history.getAccount().equals(sender)?recipient:sender;
+      String hash      = obj2String(data.get("hash"));
       List<LinkedTreeMap<String, Object>> effects = (ArrayList) data.get("effects");
       for (LinkedTreeMap<String, Object> effect : effects) {
-        if("fee".equals(effect.get("type"))) type = 2;
+        int type = getType(data,effect);
         OrderInfo order = new OrderInfo();
         order.setDate(date);
         order.setType(type);
+        order.setHash(hash);
         LinkedTreeMap<String, Object> amountInfo = (LinkedTreeMap) effect.get("amount");
-        order.setAmount(Float.parseFloat(String.valueOf(amountInfo.get("amount"))));
-        order.setCurrency(String.valueOf(amountInfo.get("currency")));
+        order.setAmount(obj2String(amountInfo.get("amount")));
+        order.setCurrency(obj2String(amountInfo.get("currency")));
+        if(Strings.isNullOrEmpty(otherAddr)){
+          otherAddr = obj2String(effect.get("issuer"));
+        }
         order.setOtherAddr(otherAddr);
 
         orders.add(order);
@@ -226,6 +255,11 @@ public class WalletClientManager implements Managed {
     CommResp resp = new CommResp("success", history);
 
     return gson.toJson(resp);
+  }
+
+  private String obj2String (Object obj){
+
+    return Objects.toString(obj,"");
   }
 
   private boolean checkTxHis(String str)
@@ -280,7 +314,7 @@ public class WalletClientManager implements Managed {
     WalletCommData rateInfo = client.getChartsLatest(targetCur, targetIssuer, cur, issuer);
     if ("success".equals(rateInfo.getStatus())) {
       Map rateMap = (LinkedHashMap) rateInfo.getResult();
-      Float rate = Float.parseFloat(String.valueOf(rateMap.get("value")));
+      Float rate = Float.parseFloat(Objects.toString(rateMap.get("value"),"0"));
       return rate;
     } else {
       printError(rateInfo, String.format("getRate api %s,%s,%s,%s", targetCur, targetIssuer, cur, issuer));
