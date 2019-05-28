@@ -236,9 +236,36 @@ public class WalletClient {
     return response;
   }
 
-  // charts/latest/
   /**
-   * 3.12 汇率 
+   * 3.12 添加信任
+   * 说明:添加信任需要消耗 0.001VRP 作为手续费，余额不足会失败
+   * sign: MD5(address + currency + issuer + timestamp + signKey)
+   * @param address 钱包地址
+   * @param currency 货币(比如说 CNY)
+   * @param password 校验密码，手机短信/GA。 根据用户安全设置来 
+   * @param issuer 网关地址(VRP 或者 VBC 不需要信任，系统默认) 
+   * @return 交易 hash
+   */
+  public WalletCommData trustSet(String address,String currency,String password,String issuer){
+    Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+    long longStamp = timestamp.getTime();
+    String sign = getSign(String.format("%s%s%s%d%s", address,currency,issuer,longStamp,this.md5Key));
+    Response response = client
+                      .target(radarUrl)
+                      .path("/api/im/trust_set")
+                      .queryParam("address", address)
+                      .queryParam("currency", currency)
+                      .queryParam("password", password)
+                      .queryParam("issuer", issuer)
+                      .queryParam("timestamp", longStamp)
+                      .queryParam("sign", sign)
+                      .request()
+                      .post(null);
+    return response.readEntity(WalletCommData.class);
+  }
+
+  /**
+   * 3.13 汇率 
    * @param cur1 货币代号1
    * @param issuer1 网关1
    * @param cur2 货币代号2
@@ -259,6 +286,24 @@ public class WalletClient {
     return info;
   }
   
+
+  /**
+   * 3.14 获取充值地址
+   * @param accountName 昵称/钱包地址/邮箱
+   * @param currency 货币(当前支持:BTC、LTC、ETH、 XRP、BCH)
+   * @return
+   */
+  public WalletCommData depositAddress(String accountName,String currency) {
+    WalletCommData info = client
+                      .target(radarUrl)
+                      .path("/api/im/deposit_address")
+                      .queryParam("accountName", accountName)
+                      .queryParam("currency", currency)
+                      .request()
+                      .get(WalletCommData.class);  
+    return info;
+  }
+
   private String getSign(String str){
     logger.info("md5 before =" + str);
     try {

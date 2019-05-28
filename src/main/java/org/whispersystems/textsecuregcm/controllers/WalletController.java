@@ -229,7 +229,7 @@ public class WalletController {
   }
 
   // getTxHistory2
-  // 3.11 交易历史
+  // 3.11-2 交易历史2
   @Timed
   @GET
   @Path("tx_history2/")
@@ -245,6 +245,42 @@ public class WalletController {
   {
     // checkAuth(account);  
     return manager.getTxHistory2(address,marker,coinType);
+  }
+
+  // 3.12
+  @Timed
+  @POST
+  @Path("trust_set/")
+  @Produces(MediaType.APPLICATION_JSON)
+  public WalletCommData trustSet(
+                                //  @Auth                          Account account,
+                                 @QueryParam("address")         String address,
+                                 @QueryParam("currency")        String currency,
+                                 @QueryParam("password")        String password,
+                                 @QueryParam("issuer")          String issuer,
+                                 @Valid                         ProvisioningMessage message
+                                )
+      throws IOException
+  {
+    // checkAuth(account); 
+    return manager.trustSet(address, currency, password, issuer);
+  }
+
+  // 3.14 获取充值地址
+  @Timed
+  @GET
+  @Path("deposit_address/")
+  @Produces(MediaType.APPLICATION_JSON)
+  public WalletCommData depositAddress(
+                                //  @Auth                            Account account,
+                                 @QueryParam("accountName")     String accountName,
+                                 @QueryParam("currency")        String currency,
+                                 @Valid                         ProvisioningMessage message
+                                )
+      throws IOException
+  {
+    // checkAuth(account);  
+    return manager.depositAddress(accountName, currency);
   }
 
   private void checkAuth(Account account)throws IOException{

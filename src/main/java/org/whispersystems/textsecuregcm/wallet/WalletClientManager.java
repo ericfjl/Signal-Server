@@ -165,6 +165,128 @@ public class WalletClientManager implements Managed {
 
     return str;
   }
+  
+  public String getTxHistory2(String address, String marker, String coinType) {
+    Response response = client.getTxHistory(address, marker);
+    String str = response.readEntity(String.class);
+    if(!checkTxHis(str)) return str;
+
+    Gson gson = new Gson();
+
+    TxHistory history = gson.fromJson(str,TxHistory.class);
+    List<Object> orders = new ArrayList<>();
+
+    List<Object> transactions = history.getTransactions();
+    for (Object obj : transactions) {
+      LinkedTreeMap<String, Object> data = (LinkedTreeMap) obj;
+      Long date = formatDate(data);
+      
+      String sender = obj2String(data.get("sender"));
+      String recipient = obj2String(data.get("recipient"));
+      String otherAddr = history.getAccount().equals(sender)?recipient:sender;
+      String hash      = obj2String(data.get("hash"));
+      List<LinkedTreeMap<String, Object>> effects = (ArrayList) data.get("effects");
+      for (LinkedTreeMap<String, Object> effect : effects) {
+        int type = getType(data,effect);
+        OrderInfo order = new OrderInfo();
+        order.setDate(date);
+        order.setType(type);
+        order.setHash(hash);
+        LinkedTreeMap<String, Object> amountInfo = (LinkedTreeMap) effect.get("amount");
+        order.setAmount(obj2String(amountInfo.get("amount")));
+        order.setCurrency(obj2String(amountInfo.get("currency")));
+        if(Strings.isNullOrEmpty(otherAddr)){
+          otherAddr = obj2String(effect.get("issuer"));
+        }
+        order.setOtherAddr(otherAddr);
+
+        orders.add(order);
+      }
+    }
+
+    history.setTransactions(orders);
+
+    CommResp resp = new CommResp("success", history);
+
+    return gson.toJson(resp);
+  }
+
+  //
+  public WalletCommData getChartsLatest(String cur1, String issuer1, String cur2, String issuer2) {
+    return client.getChartsLatest(cur1, issuer1, cur2, issuer2);
+  }
+
+  public WalletCommData trustSet(String address,String currency,String password,String issuer){
+    return client.trustSet(address, currency, password, issuer);
+  }
+
+  public WalletCommData depositAddress(String accountName,String currency) {
+    return client.depositAddress(accountName, currency);
+  }
+
+  @Override
+  public void start() throws Exception {
+    long delay = 1000L;
+    long period = 1000 * 10L;
+    TimerTask task = new TimerTask() {
+      @Override
+      public void run() {
+        updateRates();
+      }
+    };
+
+    executor.scheduleAtFixedRate(task, delay, period, TimeUnit.MILLISECONDS);
+    Thread.sleep(delay);
+  }
+
+  @Override
+  public void stop() throws Exception {
+    executor.shutdown();
+  }
+
+  //#region private
+
+  private void printError(WalletCommData info, String name) {
+
+    logger.error(String.format("%s:status=%s,date=%s", name, info.getStatus(), info.getData().toString()));
+  }
+
+  private void updateRates() {
+
+    Float cnyRate = getRate("CNY", coinMap.get("CNY").getIssuer(), "USD", coinMap.get("USD").getIssuer());
+    cnyRate = cnyRate == 0f ? 6.95f : cnyRate;
+    for (Map.Entry<String, CoinInfo> entry : coinMap.entrySet()) {
+      CoinInfo info = entry.getValue();
+
+      Float rate = getRate(info.getTargetCurrency(), info.getTargetIssuer(), info.getCurrency(), info.getIssuer());
+      if ("CNY".equals(info.getTargetCurrency())) {// 人民币换算成美元
+        rate = rate / cnyRate;
+      }
+      info.setRate(rate);
+    }
+
+  }
+
+  /**
+   * //价格默认以currency2位目标货币,currency1为价格货币.例如获取VBC价格,需要将CNY放在第一位,VBC放在第二位
+   * @param targetCur
+   * @param targetIssuer
+   * @param cur
+   * @param issuer
+   * @return
+   */
+  private Float getRate(String targetCur, String targetIssuer, String cur, String issuer) {
+    WalletCommData rateInfo = client.getChartsLatest(targetCur, targetIssuer, cur, issuer);
+    if ("success".equals(rateInfo.getStatus())) {
+      Map rateMap = (LinkedHashMap) rateInfo.getResult();
+      Float rate = Float.parseFloat(Objects.toString(rateMap.get("value"),"0"));
+      return rate;
+    } else {
+      printError(rateInfo, String.format("getRate api %s,%s,%s,%s", targetCur, targetIssuer, cur, issuer));
+    }
+    return 0.0f;
+  }
+
 
   private Long formatDate(LinkedTreeMap<String, Object> data)
   {
@@ -212,51 +334,6 @@ public class WalletClientManager implements Managed {
 
     return 100;
   }
-  
-  public String getTxHistory2(String address, String marker, String coinType) {
-    Response response = client.getTxHistory(address, marker);
-    String str = response.readEntity(String.class);
-    if(!checkTxHis(str)) return str;
-
-    Gson gson = new Gson();
-
-    TxHistory history = gson.fromJson(str,TxHistory.class);
-    List<Object> orders = new ArrayList<>();
-
-    List<Object> transactions = history.getTransactions();
-    for (Object obj : transactions) {
-      LinkedTreeMap<String, Object> data = (LinkedTreeMap) obj;
-      Long date = formatDate(data);
-      
-      String sender = obj2String(data.get("sender"));
-      String recipient = obj2String(data.get("recipient"));
-      String otherAddr = history.getAccount().equals(sender)?recipient:sender;
-      String hash      = obj2String(data.get("hash"));
-      List<LinkedTreeMap<String, Object>> effects = (ArrayList) data.get("effects");
-      for (LinkedTreeMap<String, Object> effect : effects) {
-        int type = getType(data,effect);
-        OrderInfo order = new OrderInfo();
-        order.setDate(date);
-        order.setType(type);
-        order.setHash(hash);
-        LinkedTreeMap<String, Object> amountInfo = (LinkedTreeMap) effect.get("amount");
-        order.setAmount(obj2String(amountInfo.get("amount")));
-        order.setCurrency(obj2String(amountInfo.get("currency")));
-        if(Strings.isNullOrEmpty(otherAddr)){
-          otherAddr = obj2String(effect.get("issuer"));
-        }
-        order.setOtherAddr(otherAddr);
-
-        orders.add(order);
-      }
-    }
-
-    history.setTransactions(orders);
-
-    CommResp resp = new CommResp("success", history);
-
-    return gson.toJson(resp);
-  }
 
   private String obj2String (Object obj){
 
@@ -276,71 +353,6 @@ public class WalletClientManager implements Managed {
     }
     return true;
   }
-
-  //
-  public WalletCommData getChartsLatest(String cur1, String issuer1, String cur2, String issuer2) {
-    return client.getChartsLatest(cur1, issuer1, cur2, issuer2);
-  }
-
-  private void printError(WalletCommData info, String name) {
-
-    logger.error(String.format("%s:status=%s,date=%s", name, info.getStatus(), info.getData().toString()));
-  }
-
-  private void updateRates() {
-
-    Float cnyRate = getRate("CNY", coinMap.get("CNY").getIssuer(), "USD", coinMap.get("USD").getIssuer());
-    cnyRate = cnyRate == 0f ? 6.95f : cnyRate;
-    for (Map.Entry<String, CoinInfo> entry : coinMap.entrySet()) {
-      CoinInfo info = entry.getValue();
-
-      Float rate = getRate(info.getTargetCurrency(), info.getTargetIssuer(), info.getCurrency(), info.getIssuer());
-      if ("CNY".equals(info.getTargetCurrency())) {// 人民币换算成美元
-        rate = rate / cnyRate;
-      }
-      info.setRate(rate);
-    }
-
-  }
-
-  /**
-   * //价格默认以currency2位目标货币,currency1为价格货币.例如获取VBC价格,需要将CNY放在第一位,VBC放在第二位
-   * @param targetCur
-   * @param targetIssuer
-   * @param cur
-   * @param issuer
-   * @return
-   */
-  private Float getRate(String targetCur, String targetIssuer, String cur, String issuer) {
-    WalletCommData rateInfo = client.getChartsLatest(targetCur, targetIssuer, cur, issuer);
-    if ("success".equals(rateInfo.getStatus())) {
-      Map rateMap = (LinkedHashMap) rateInfo.getResult();
-      Float rate = Float.parseFloat(Objects.toString(rateMap.get("value"),"0"));
-      return rate;
-    } else {
-      printError(rateInfo, String.format("getRate api %s,%s,%s,%s", targetCur, targetIssuer, cur, issuer));
-    }
-    return 0.0f;
-  }
-
-  @Override
-  public void start() throws Exception {
-    long delay = 1000L;
-    long period = 1000 * 10L;
-    TimerTask task = new TimerTask() {
-      @Override
-      public void run() {
-        updateRates();
-      }
-    };
-
-    executor.scheduleAtFixedRate(task, delay, period, TimeUnit.MILLISECONDS);
-    Thread.sleep(delay);
-  }
-
-  @Override
-  public void stop() throws Exception {
-    executor.shutdown();
-  }
+  //#endregion
 
 }
