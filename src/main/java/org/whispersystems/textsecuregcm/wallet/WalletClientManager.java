@@ -18,6 +18,7 @@ package org.whispersystems.textsecuregcm.wallet;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -75,13 +76,13 @@ public class WalletClientManager implements Managed {
   public WalletCommData getAccounts(String phoneCode, String phoneNumber) {
     WalletCommData info = client.getAccounts(phoneCode, phoneNumber);
     if ("success".equals(info.getStatus()) && info.getResult() != null) {
-      List accounts = (ArrayList) info.getResult();
+      ArrayList<Object> accounts = (ArrayList)info.getResult();
       if (accounts == null || accounts.size() == 0) {
         WalletCommData regi = client.register(phoneCode, phoneNumber);
         if ("success".equals(regi.getStatus())) {
-          Map map = (LinkedHashMap) regi.getResult();
-          accounts.add(String.format("%s,%s", phoneNumber, map.get("address")));
-          info.setResult(accounts);
+          // Map map = (LinkedHashMap) regi.getResult();
+          // accounts.add(String.format("%s,%s", phoneNumber, map.get("address")));
+          // info.setResult(accounts);
         } else {
           printError(regi, "register api");
         }
@@ -334,7 +335,7 @@ public class WalletClientManager implements Managed {
     };
 
     executor.scheduleAtFixedRate(task, delay, period, TimeUnit.MILLISECONDS);
-    Thread.sleep(delay + period * 3);
+    Thread.sleep(delay);
   }
 
   @Override
