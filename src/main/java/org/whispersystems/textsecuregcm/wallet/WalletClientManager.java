@@ -143,6 +143,10 @@ public class WalletClientManager implements Managed {
     return client.makeTx(address, destination, currency, amount, password, issuer);
   }
 
+  public WalletCommData mobileBind(String address,String phoneCode,String phoneNumber,String smsCode,String password){
+    return client.mobileBind(address, phoneCode, phoneNumber, smsCode, password);
+  }
+
   //
   public WalletCommData setGoogleAuth(String address, int flag, String password) {
     return client.setGoogleAuth(address, flag, password);

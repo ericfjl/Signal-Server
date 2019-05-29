@@ -143,6 +143,35 @@ public class WalletClient {
     return response.readEntity(WalletCommData.class);
   }
 
+  /**
+   * 3.7 绑定手机 
+   * sign: MD5(address + phoneCode + phoneNumber + timestamp + signKey)
+   * @param address 钱包地址
+   * @param phoneCode 手机区号
+   * @param phoneNumber 手机号码
+   * @param smsCode 短信验证码
+   * @param password 密码，可能是支付密码/GA。 根据用户安全设置来
+   * @return
+   */
+  public WalletCommData mobileBind(String address,String phoneCode,String phoneNumber,String smsCode,String password){
+    Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+    long longStamp = timestamp.getTime();
+    String sign = getSign(String.format("%s%s%s%d%s", address,phoneCode,phoneNumber,longStamp,this.md5Key));
+    Response response = client
+                      .target(radarUrl)
+                      .path("/api/im/mobile_bind")
+                      .queryParam("address", address)
+                      .queryParam("phoneCode", phoneCode)
+                      .queryParam("phoneNumber", phoneNumber)
+                      .queryParam("smsCode", smsCode)
+                      .queryParam("password", password)
+                      .queryParam("timestamp", longStamp)
+                      .queryParam("sign", sign)
+                      .request()
+                      .post(null);
+    return response.readEntity(WalletCommData.class);
+  }
+
   // 3.8 获取 google_auth 密钥(开启 google auth 第一步)
   /**
      * 

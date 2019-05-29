@@ -136,6 +136,25 @@ public class WalletController {
     // checkAuth(account);
     return manager.makeTx(address, destination, currency, amount, password, issuer);
   }
+  // 3.7 绑定手机
+  @Timed
+  @POST
+  @Path("mobile_bind/")
+  @Produces(MediaType.APPLICATION_JSON)
+  public WalletCommData mobileBind(
+                                //  @Auth                            Account account,
+                                 @QueryParam("address")           String address,
+                                 @QueryParam("phoneCode")         String phoneCode,
+                                 @QueryParam("phoneNumber")       String phoneNumber,
+                                 @QueryParam("smsCode")           String smsCode,
+                                 @QueryParam("password")          String password,
+                                 @Valid                           ProvisioningMessage message
+                                )
+      throws IOException
+  {
+    // checkAuth(account);
+    return manager.mobileBind(address, phoneCode, phoneNumber, smsCode, password);
+  }
 
   // 3.8 获取 google_auth 密钥(开启 google auth 第一步)
   @Timed
