@@ -2,6 +2,7 @@ package org.whispersystems.textsecuregcm.controllers;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 import javax.validation.Valid;
 import javax.ws.rs.GET;
@@ -291,7 +292,7 @@ public class WalletController {
   @Path("deposit_address/")
   @Produces(MediaType.APPLICATION_JSON)
   public WalletCommData depositAddress(
-                                //  @Auth                            Account account,
+                                //  @Auth                          Optional<Account> account,
                                  @QueryParam("accountName")     String accountName,
                                  @QueryParam("currency")        String currency,
                                  @Valid                         ProvisioningMessage message
@@ -302,12 +303,28 @@ public class WalletController {
     return manager.depositAddress(accountName, currency);
   }
 
-  private void checkAuth(Account account)throws IOException{
+  @Timed
+  @GET
+  @Path("deposit_address2/")
+  @Produces(MediaType.APPLICATION_JSON)
+  public WalletCommData depositAddress2(
+                                 @Auth                          Optional<Account> account,
+                                 @QueryParam("accountName")     String accountName,
+                                 @QueryParam("currency")        String currency,
+                                 @Valid                         ProvisioningMessage message
+                                )
+      throws IOException
+  {
+    checkAuth(account);  
+    return manager.depositAddress(accountName, currency);
+  }
 
-    // if (!account.isPresent() ) {
-    //   throw new WebApplicationException(Response.Status.UNAUTHORIZED);
-    // }
-    if (!account.getAuthenticatedDevice().isPresent()) throw new AssertionError();
+  private void checkAuth(Optional<Account> account)throws IOException{
+
+    
+    if (!account.isPresent() ) {
+      throw new WebApplicationException(Response.Status.UNAUTHORIZED);
+    }
   }
 
 }
