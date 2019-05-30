@@ -333,6 +333,139 @@ public class WalletClient {
     return info;
   }
 
+
+  /**
+   * 
+   * @param accountName
+   * @param currency
+   * @return 
+    
+    
+   
+    
+    
+    
+   */
+
+  /**
+   * 3.15 登陆(第一步) 登陆第一步，验证登陆密码
+   * sign: MD5(nick + timestamp + signKey)
+   * @param nick 用户昵称
+   * @param password 登陆密码
+   * @return 
+   * "result": {
+   *    "loginToken": "b73786f8e65c21e6ec017906ef59527ee0f358e32d85f25a1fc2e3d394302b27",  //登陆 token，供登陆第二步使用(只能用一次)
+   *    "verifyType": 1 //登陆第二步验证方式， 1--支付密码 2--google auth 3--短信(若是短信，系统会自动往用户手机下发短信) 
+   * },
+   * "status": "success" }
+   */
+  public WalletCommData login(String nick,String password){
+    Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+    long longStamp = timestamp.getTime();
+    String sign = getSign(String.format("%s%d%s", nick,longStamp,this.md5Key));
+    Response response = client
+                      .target(radarUrl)
+                      .path("/api/im/login")
+                      .queryParam("nick", nick)
+                      .queryParam("password", password)
+                      .queryParam("timestamp", longStamp)
+                      .queryParam("sign", sign)
+                      .request()
+                      .post(null);
+    return response.readEntity(WalletCommData.class);
+  }
+
+  /**
+   * 3.16 登陆验证(第二步) 根据第一步 login 接口返回的 token 以及验证方式，进行登陆校验
+   * o sign: MD5(token + timestamp + signKey)
+   * @param token 登陆 token(登陆第一步返回的) 
+   * @param password 校验密码(根据第一步的返回判断校验方式，若是短信不需要 手动申请，login 接口会自动下发)
+   * @return {
+              "result": {
+              "address": "rEz8g4eHtb1tp83q5b5TtDgD29vctE6jEr", //钱包地址
+              "mobile" : "86/12222112212" //手机号,若用户绑定了手机号有改返回 },
+              "status": "success" 
+            }
+   */
+  public WalletCommData loginConfirm(String token,String password){
+    Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+    long longStamp = timestamp.getTime();
+    String sign = getSign(String.format("%s%d%s", token,longStamp,this.md5Key));
+    Response response = client
+                      .target(radarUrl)
+                      .path("/api/im/login_confirm")
+                      .queryParam("token", token)
+                      .queryParam("password", password)
+                      .queryParam("timestamp", longStamp)
+                      .queryParam("sign", sign)
+                      .request()
+                      .post(null);
+    return response.readEntity(WalletCommData.class);
+  }
+
+
+  /**
+   * 3.17 忘记密码 改接口用于找回密码第一步:申请邮箱或者手机验证码
+   * sign: MD5(nick + timestamp + signKey)
+ 返回结果 
+   * @param nick 用户昵称
+   * @param flag 找回密码类型，0: 登陆密码 1–支付密码
+   * @param recoveryWay 找回方式，0: 邮箱 1:手机(支付密码不能用邮箱找回)
+   * @return {
+              "result": {
+              "email": "tes***2@163.com", //邮箱找回，返回邮箱，带* "mobile": "132****2122" //手机找回，返回手机,带*
+              },
+              "status": "success" 
+            }
+   */
+  public WalletCommData forgotPassword(String nick,String flag,String recoveryWay){
+    Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+    long longStamp = timestamp.getTime();
+    String sign = getSign(String.format("%s%d%s", nick,longStamp,this.md5Key));
+    Response response = client
+                      .target(radarUrl)
+                      .path("/api/im/forgot_password")
+                      .queryParam("nick", nick)
+                      .queryParam("flag", flag)
+                      .queryParam("recoveryWay", recoveryWay)
+                      .queryParam("timestamp", longStamp)
+                      .queryParam("sign", sign)
+                      .request()
+                      .post(null);
+    return response.readEntity(WalletCommData.class);
+  }
+
+  // 
+
+  /**
+   * 3.18 重置密码 使用说明:改接口用于找回密码第二步，google auth 不用调用 forgot_password 
+   * sign: MD5(nick + timestamp + signKey)
+   * @param nick 用户昵称
+   * @param flag 找回密码类型，0: 登陆密码 1–支付密码
+   * @param recoveryWay 找回方式，0: 邮箱(支付密码不能用邮箱找回) 1:手机 2:google auth
+   * @param password 校验密码(邮箱密码或者手机或者 google) 
+   * @param newPassword : 新密码
+   * @return { "status": "success" }
+   */
+  public WalletCommData resetPassword(String nick,String flag,String recoveryWay,String password,String newPassword){
+    Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+    long longStamp = timestamp.getTime();
+    String sign = getSign(String.format("%s%d%s", nick,longStamp,this.md5Key));
+    Response response = client
+                      .target(radarUrl)
+                      .path("/api/im/reset_password")
+                      .queryParam("nick", nick)
+                      .queryParam("flag", flag)
+                      .queryParam("recoveryWay", recoveryWay)
+                      .queryParam("password", password)
+                      .queryParam("newPassword", newPassword)
+                      .queryParam("timestamp", longStamp)
+                      .queryParam("sign", sign)
+                      .request()
+                      .post(null);
+    return response.readEntity(WalletCommData.class);
+  }
+
   private String getSign(String str){
     logger.info("md5 before =" + str);
     try {

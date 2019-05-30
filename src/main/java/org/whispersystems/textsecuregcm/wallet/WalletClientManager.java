@@ -228,6 +228,22 @@ public class WalletClientManager implements Managed {
     return client.depositAddress(accountName, currency);
   }
 
+  public WalletCommData login(String nick,String password){
+    return client.login(nick, password);
+  }
+
+  public WalletCommData loginConfirm(String token,String password){
+    return client.loginConfirm(token, password);
+  }
+
+  public WalletCommData forgotPassword(String nick,String flag,String recoveryWay){
+    return client.forgotPassword(nick, flag, recoveryWay);
+  }
+
+  public WalletCommData resetPassword(String nick,String flag,String recoveryWay,String password, String newPassword){
+    return client.resetPassword(nick, flag, recoveryWay, password, newPassword);
+  }
+
   @Override
   public void start() throws Exception {
     long delay = 1000L;

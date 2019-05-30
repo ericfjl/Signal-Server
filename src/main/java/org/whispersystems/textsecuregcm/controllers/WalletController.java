@@ -319,6 +319,80 @@ public class WalletController {
     return manager.depositAddress(accountName, currency);
   }
 
+
+  // 3.15 登陆(第一步)
+  @Timed
+  @POST
+  @Path("login/")
+  @Produces(MediaType.APPLICATION_JSON)
+  public WalletCommData login(
+                                //  @Auth                            Account account,
+                                 @QueryParam("nick")              String nick,
+                                 @QueryParam("password")          String password,
+                                 @Valid                           ProvisioningMessage message
+                                )
+      throws IOException
+  {
+    // checkAuth(account);
+    return manager.login(nick, password);
+  }
+  
+
+  // 3.16 登陆验证(第二步) 根据第一步 login 接口返回的 token 以及验证方式，进行登陆校验
+  @Timed
+  @POST
+  @Path("login_confirm/")
+  @Produces(MediaType.APPLICATION_JSON)
+  public WalletCommData loginConfirm(
+                                //  @Auth                            Account account,
+                                 @QueryParam("token")              String token,
+                                 @QueryParam("password")          String password,
+                                 @Valid                           ProvisioningMessage message
+                                )
+      throws IOException
+  {
+    // checkAuth(account);
+    return manager.loginConfirm(token, password);
+  }
+
+  // 3.17 忘记密码 改接口用于找回密码第一步:申请邮箱或者手机验证码
+  @Timed
+  @POST
+  @Path("forgot_password/")
+  @Produces(MediaType.APPLICATION_JSON)
+  public WalletCommData forgotPassword(
+                                //  @Auth                            Account account,
+                                 @QueryParam("nick")              String nick,
+                                 @QueryParam("flag")              String flag,
+                                 @QueryParam("recoveryWay")       String recoveryWay,
+                                 @Valid                           ProvisioningMessage message
+                                )
+      throws IOException
+  {
+    // checkAuth(account);
+    return manager.forgotPassword(nick, flag, recoveryWay);
+  }
+
+  // 3.18 重置密码 使用说明:改接口用于找回密码第二步，google auth 不用调用 forgot_password 
+  @Timed
+  @POST
+  @Path("reset_password/")
+  @Produces(MediaType.APPLICATION_JSON)
+  public WalletCommData resetPassword(
+                                //  @Auth                            Account account,
+                                 @QueryParam("nick")              String nick,
+                                 @QueryParam("flag")              String flag,
+                                 @QueryParam("recoveryWay")       String recoveryWay,
+                                 @QueryParam("password")          String password,
+                                 @QueryParam("newPassword")          String newPassword,
+                                 @Valid                           ProvisioningMessage message
+                                )
+      throws IOException
+  {
+    // checkAuth(account);
+    return manager.resetPassword(nick, flag, recoveryWay, password, newPassword);
+  }
+
   private void checkAuth(Optional<Account> account)throws IOException{
 
     
