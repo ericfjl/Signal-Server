@@ -205,8 +205,8 @@ public class WhisperServerService extends Application<WhisperServerConfiguration
     ActiveUserCounter                          activeUserCounter               = new ActiveUserCounter(config.getMetricsFactory(), cacheClient);
     List<AccountDatabaseCrawlerListener>       accountDatabaseCrawlerListeners = Arrays.asList(activeUserCounter, directoryReconciler);
 
-    // AccountDatabaseCrawlerCache accountDatabaseCrawlerCache = new AccountDatabaseCrawlerCache(cacheClient);
-    // AccountDatabaseCrawler      accountDatabaseCrawler      = new AccountDatabaseCrawler(accounts, accountDatabaseCrawlerCache, accountDatabaseCrawlerListeners, config.getAccountDatabaseCrawlerConfiguration().getChunkSize(), config.getAccountDatabaseCrawlerConfiguration().getChunkIntervalMs());
+    AccountDatabaseCrawlerCache accountDatabaseCrawlerCache = new AccountDatabaseCrawlerCache(cacheClient);
+    AccountDatabaseCrawler      accountDatabaseCrawler      = new AccountDatabaseCrawler(accounts, accountDatabaseCrawlerCache, accountDatabaseCrawlerListeners, config.getAccountDatabaseCrawlerConfiguration().getChunkSize(), config.getAccountDatabaseCrawlerConfiguration().getChunkIntervalMs());
 
     messagesCache.setPubSubManager(pubSubManager, pushSender);
 
@@ -221,7 +221,7 @@ public class WhisperServerService extends Application<WhisperServerConfiguration
     environment.lifecycle().manage(pushSender);
     environment.lifecycle().manage(messagesCache);
     environment.lifecycle().manage(WalletClientManager);
-    // environment.lifecycle().manage(accountDatabaseCrawler);
+    environment.lifecycle().manage(accountDatabaseCrawler);
 
     AttachmentController attachmentController = new AttachmentController(rateLimiters, urlSigner);
     KeysController       keysController       = new KeysController(rateLimiters, keys, accountsManager, directoryQueue);

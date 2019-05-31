@@ -333,20 +333,6 @@ public class WalletClient {
     return info;
   }
 
-
-  /**
-   * 
-   * @param accountName
-   * @param currency
-   * @return 
-    
-    
-   
-    
-    
-    
-   */
-
   /**
    * 3.15 登陆(第一步) 登陆第一步，验证登陆密码
    * sign: MD5(nick + timestamp + signKey)
@@ -467,7 +453,7 @@ public class WalletClient {
   }
 
   private String getSign(String str){
-    logger.info("md5 before =" + str);
+    // logger.info("md5 before =" + str);
     try {
       byte[] bytesOfMessage = str.getBytes("UTF-8");
       MessageDigest md = MessageDigest.getInstance("MD5");
