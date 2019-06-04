@@ -302,7 +302,7 @@ public class WalletClientManager implements Managed {
       Float rate = Float.parseFloat(Objects.toString(rateMap.get("value"),"0"));
       return rate;
     } else {
-      printError(rateInfo, String.format("getRate api %s,%s,%s,%s", targetCur, targetIssuer, cur, issuer));
+      // printError(rateInfo, String.format("getRate api %s,%s,%s,%s", targetCur, targetIssuer, cur, issuer));
     }
     return 0.0f;
   }
