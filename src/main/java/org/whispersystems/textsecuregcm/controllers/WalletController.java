@@ -439,13 +439,35 @@ public class WalletController {
                                  @QueryParam("currency")          String currency,
                                  @QueryParam("password")          String password,
                                  @QueryParam("amount")            String amount,
-                                 @QueryParam("dt")                String dt,
+                                 @QueryParam("dt")                int dt,
                                  @Valid                           ProvisioningMessage message
                                 )
       throws IOException
   {
     // checkAuth(account);
     return manager.withdrawMake(accountName, currency, password, amount, dt);
+  }
+
+
+  //3.21-2 提交提现申请2
+  @Timed
+  @POST
+  @Path("withdraw_make2/")
+  @Produces(MediaType.APPLICATION_JSON)
+  public WalletCommData withdrawMake2(
+                                //  @Auth                            Account account,
+                                 @QueryParam("accountName")       String accountName,
+                                 @QueryParam("currency")          String currency,
+                                 @QueryParam("address")           String address,
+                                 @QueryParam("password")          String password,
+                                 @QueryParam("amount")            String amount,
+                                 @QueryParam("dt")                int dt,
+                                 @Valid                           ProvisioningMessage message
+                                )
+      throws IOException
+  {
+    // checkAuth(account);
+    return manager.withdrawMake2(accountName, currency, password, amount, dt, address);
   }
 
   private void checkAuth(Optional<Account> account)throws IOException{

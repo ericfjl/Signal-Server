@@ -252,8 +252,19 @@ public class WalletClientManager implements Managed {
     return client.withdrawUpdate(accountName, address, currency, password);
   }
 
-  public WalletCommData withdrawMake(String accountName,String currency,String password,String amount,String dt){
+  public WalletCommData withdrawMake(String accountName,String currency,String password,String amount,int dt){
     return client.withdrawMake(accountName, currency, password, amount, dt);
+  }
+
+
+  public WalletCommData withdrawMake2(String accountName,String currency,String password,String amount,int dt,String address){
+    WalletCommData info = client.withdrawUpdate(accountName, address, currency, password);
+    if ("success".equals(info.getStatus())) {
+      return client.withdrawMake(accountName, currency, password, amount, dt);
+    } else {
+      return info;
+    }
+    
   }
 
   @Override

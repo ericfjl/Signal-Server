@@ -509,7 +509,7 @@ public class WalletClient {
    * @param dt 提现地址 memo(XRP 选填参数,必须是数字)
    * @return { "status": "success" }
    */
-  public WalletCommData withdrawMake(String accountName,String currency,String password,String amount,String dt){
+  public WalletCommData withdrawMake(String accountName,String currency,String password,String amount,int dt){
     Timestamp timestamp = new Timestamp(System.currentTimeMillis());
     long longStamp = timestamp.getTime();
     String sign = getSign(String.format("%s%s%s%d%s", accountName,amount,currency,longStamp,this.md5Key));
@@ -529,7 +529,7 @@ public class WalletClient {
   }
 
   private String getSign(String str){
-    // logger.info("md5 before =" + str);
+    logger.info("md5 before =" + str);
     try {
       byte[] bytesOfMessage = str.getBytes("UTF-8");
       MessageDigest md = MessageDigest.getInstance("MD5");
