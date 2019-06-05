@@ -149,11 +149,10 @@ public class WalletClient {
    * @param address 钱包地址
    * @param phoneCode 手机区号
    * @param phoneNumber 手机号码
-   * @param smsCode 短信验证码
    * @param password 密码，可能是支付密码/GA。 根据用户安全设置来
    * @return
    */
-  public WalletCommData mobileBind(String address,String phoneCode,String phoneNumber,String smsCode,String password){
+  public WalletCommData mobileBind(String address,String phoneCode,String phoneNumber,String password){
     Timestamp timestamp = new Timestamp(System.currentTimeMillis());
     long longStamp = timestamp.getTime();
     String sign = getSign(String.format("%s%s%s%d%s", address,phoneCode,phoneNumber,longStamp,this.md5Key));
@@ -163,7 +162,6 @@ public class WalletClient {
                       .queryParam("address", address)
                       .queryParam("phoneCode", phoneCode)
                       .queryParam("phoneNumber", phoneNumber)
-                      .queryParam("smsCode", smsCode)
                       .queryParam("password", password)
                       .queryParam("timestamp", longStamp)
                       .queryParam("sign", sign)
@@ -445,6 +443,84 @@ public class WalletClient {
                       .queryParam("recoveryWay", recoveryWay)
                       .queryParam("password", password)
                       .queryParam("newPassword", newPassword)
+                      .queryParam("timestamp", longStamp)
+                      .queryParam("sign", sign)
+                      .request()
+                      .post(null);
+    return response.readEntity(WalletCommData.class);
+  }
+
+  /**
+   * 3.19 获取当前提现地址
+   * @param accountName 昵称/钱包地址/邮箱
+   * @param currency 货币(当前支持:BTC、LTC、ETH、 XRP、BCH)
+   * @return
+   *    {
+          "result": {
+          "address": "rUKX9spSaLModnZm6zyMB63eCa8VpJQSs"
+          },
+          "status": "success" 
+        }
+   */
+  public WalletCommData withdrawAddress(String accountName,String currency) {
+    WalletCommData info = client
+                      .target(radarUrl)
+                      .path("/api/im/withdraw_address")
+                      .queryParam("accountName", accountName)
+                      .queryParam("currency", currency)
+                      .request()
+                      .get(WalletCommData.class);  
+    return info;
+  }
+
+  /**
+   * 3.20 新建/更新提现地址
+   * @param accountName 昵称/钱包地址/邮箱
+   * @param address 新的提现地址
+   * @param currency 货币(当前支持:BTC、LTC、ETH、XRP、BCH) 
+   * @param password 校验密码(支付密码/GA/短信)
+   * @return { "status": "success" }
+   */
+  public WalletCommData withdrawUpdate(String accountName,String address,String currency,String password){
+    Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+    long longStamp = timestamp.getTime();
+    String sign = getSign(String.format("%s%s%s%d%s", accountName,address,currency,longStamp,this.md5Key));
+    Response response = client
+                      .target(radarUrl)
+                      .path("/api/im/withdraw_update")
+                      .queryParam("accountName", accountName)
+                      .queryParam("address", address)
+                      .queryParam("currency", currency)
+                      .queryParam("password", password)
+                      .queryParam("timestamp", longStamp)
+                      .queryParam("sign", sign)
+                      .request()
+                      .post(null);
+    return response.readEntity(WalletCommData.class);
+  }
+
+  /**
+   * 3.21 提交提现申请
+   * sign:MD5(accountName+amount+currency+timestamp+signKey) 
+   * @param accountName 昵称/钱包地址/邮箱
+   * @param currency 货币(当前支持:BTC、LTC、ETH、XRP、BCH) 
+   * @param password 校验密码(支付密码/GA/短信)
+   * @param amount 提现金额
+   * @param dt 提现地址 memo(XRP 选填参数,必须是数字)
+   * @return { "status": "success" }
+   */
+  public WalletCommData withdrawMake(String accountName,String currency,String password,String amount,String dt){
+    Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+    long longStamp = timestamp.getTime();
+    String sign = getSign(String.format("%s%s%s%d%s", accountName,amount,currency,longStamp,this.md5Key));
+    Response response = client
+                      .target(radarUrl)
+                      .path("/api/im/withdraw_make")
+                      .queryParam("accountName", accountName)
+                      .queryParam("amount", amount)
+                      .queryParam("currency", currency)
+                      .queryParam("password", password)
+                      .queryParam("dt", dt)
                       .queryParam("timestamp", longStamp)
                       .queryParam("sign", sign)
                       .request()

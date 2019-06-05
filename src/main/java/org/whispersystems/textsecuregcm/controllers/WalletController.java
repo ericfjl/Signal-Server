@@ -147,14 +147,13 @@ public class WalletController {
                                  @QueryParam("address")           String address,
                                  @QueryParam("phoneCode")         String phoneCode,
                                  @QueryParam("phoneNumber")       String phoneNumber,
-                                 @QueryParam("smsCode")           String smsCode,
                                  @QueryParam("password")          String password,
                                  @Valid                           ProvisioningMessage message
                                 )
       throws IOException
   {
     // checkAuth(account);
-    return manager.mobileBind(address, phoneCode, phoneNumber, smsCode, password);
+    return manager.mobileBind(address, phoneCode, phoneNumber, password);
   }
 
   // 3.8 获取 google_auth 密钥(开启 google auth 第一步)
@@ -391,6 +390,62 @@ public class WalletController {
   {
     // checkAuth(account);
     return manager.resetPassword(nick, flag, recoveryWay, password, newPassword);
+  }
+
+  //3.19 获取当前提现地址
+  @Timed
+  @GET
+  @Path("withdraw_address/")
+  @Produces(MediaType.APPLICATION_JSON)
+  public WalletCommData withdrawAddress(
+                                //  @Auth                            Account account,
+                                 @QueryParam("accountName")     String accountName,
+                                 @QueryParam("currency")        String currency,
+                                 @Valid                         ProvisioningMessage message
+                                )
+      throws IOException
+  {
+    // checkAuth(account);  
+    return manager.withdrawAddress(accountName, currency);
+  }
+
+  // 3.20 新建/更新提现地址
+  @Timed
+  @POST
+  @Path("withdraw_update/")
+  @Produces(MediaType.APPLICATION_JSON)
+  public WalletCommData withdrawUpdate(
+                                //  @Auth                            Account account,
+                                 @QueryParam("accountName")       String accountName,
+                                 @QueryParam("address")           String address,
+                                 @QueryParam("currency")          String currency,
+                                 @QueryParam("password")          String password,
+                                 @Valid                           ProvisioningMessage message
+                                )
+      throws IOException
+  {
+    // checkAuth(account);
+    return manager.withdrawUpdate(accountName, address, currency, password);
+  }
+
+  //3.21 提交提现申请
+  @Timed
+  @POST
+  @Path("withdraw_make/")
+  @Produces(MediaType.APPLICATION_JSON)
+  public WalletCommData withdrawMake(
+                                //  @Auth                            Account account,
+                                 @QueryParam("accountName")       String accountName,
+                                 @QueryParam("currency")          String currency,
+                                 @QueryParam("password")          String password,
+                                 @QueryParam("amount")            String amount,
+                                 @QueryParam("dt")                String dt,
+                                 @Valid                           ProvisioningMessage message
+                                )
+      throws IOException
+  {
+    // checkAuth(account);
+    return manager.withdrawMake(accountName, currency, password, amount, dt);
   }
 
   private void checkAuth(Optional<Account> account)throws IOException{

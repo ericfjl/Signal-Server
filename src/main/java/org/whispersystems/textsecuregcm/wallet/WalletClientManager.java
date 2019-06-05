@@ -143,8 +143,8 @@ public class WalletClientManager implements Managed {
     return client.makeTx(address, destination, currency, amount, password, issuer);
   }
 
-  public WalletCommData mobileBind(String address,String phoneCode,String phoneNumber,String smsCode,String password){
-    return client.mobileBind(address, phoneCode, phoneNumber, smsCode, password);
+  public WalletCommData mobileBind(String address,String phoneCode,String phoneNumber,String password){
+    return client.mobileBind(address, phoneCode, phoneNumber, password);
   }
 
   //
@@ -242,6 +242,18 @@ public class WalletClientManager implements Managed {
 
   public WalletCommData resetPassword(String nick,String flag,String recoveryWay,String password, String newPassword){
     return client.resetPassword(nick, flag, recoveryWay, password, newPassword);
+  }
+
+  public WalletCommData withdrawAddress(String accountName,String currency) {
+    return client.withdrawAddress(accountName, currency);
+  }
+
+  public WalletCommData withdrawUpdate(String accountName,String address,String currency,String password){
+    return client.withdrawUpdate(accountName, address, currency, password);
+  }
+
+  public WalletCommData withdrawMake(String accountName,String currency,String password,String amount,String dt){
+    return client.withdrawMake(accountName, currency, password, amount, dt);
   }
 
   @Override
