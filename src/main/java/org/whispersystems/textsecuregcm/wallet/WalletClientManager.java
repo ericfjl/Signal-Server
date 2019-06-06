@@ -352,6 +352,10 @@ public class WalletClientManager implements Managed {
   private List<String> recis = Arrays.asList("active_acc", "received");
   private int getType(LinkedTreeMap<String, Object> data,LinkedTreeMap<String, Object> effect){
     
+    if(effect != null){
+      if("fee".equals(effect.get("type"))) return 2;
+    }
+    
     String type = obj2String(data.get("type"));
     if(recis.contains(type))
     {
@@ -359,9 +363,6 @@ public class WalletClientManager implements Managed {
     }
     if(sents.contains(type)){
       return 1;
-    }
-    if(effect != null){
-      if("fee".equals(effect.get("type"))) return 2;
     }
     if("offer_cancelled".equals(type)) return 6;
     if("offercreate".equals(type))

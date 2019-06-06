@@ -22,6 +22,11 @@ public class WalletCommData implements Principal {
     public WalletCommData() {
 
     }
+    public WalletCommData(String status,Object result,Object data){
+        this.status = status;
+        this.result = result;
+        this.data   = data;
+    }
 
     public String getStatus() {
         return status;
