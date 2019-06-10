@@ -63,12 +63,12 @@ public class WalletClientManager implements Managed {
         continue;
       }
       String[] list = coin.split(",");
-      if (list == null || list.length < 6) {
+      if (list == null || list.length < 7) {
         logger.error("config errror ... radar-coinIcons ! " + coin);
         continue;
       }
 
-      coinMap.put(list[0], new CoinInfo(list[0], list[1], list[2], list[3], list[4], Float.valueOf(list[5])));
+      coinMap.put(list[0], new CoinInfo(list[0], list[1], list[2], list[3], list[4], Float.valueOf(list[5]), Boolean.valueOf(list[6])));
     }
   }
 
@@ -125,6 +125,7 @@ public class WalletClientManager implements Managed {
       retMap.put("rate", coinMap.get(currency).getRate());
       retMap.put("icon", coinMap.get(currency).getIcon());
       retMap.put("issuer", coinMap.get(currency).getIssuer());
+      retMap.put("deposit_address", coinMap.get(currency).getDepositAddress());
       result.add(retMap);
     }
     info.setResult(result);
@@ -355,7 +356,7 @@ public class WalletClientManager implements Managed {
     if(effect != null){
       if("fee".equals(effect.get("type"))) return 2;
     }
-    
+
     String type = obj2String(data.get("type"));
     if(recis.contains(type))
     {

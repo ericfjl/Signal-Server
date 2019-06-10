@@ -26,16 +26,20 @@ public class CoinInfo {
     @JsonProperty
     private Float rate = 0.0f;
 
+    @JsonProperty
+    private Boolean depositAddress; // 是否支持充值地址
+
     public CoinInfo() {
     }
 
-    public CoinInfo(String currency,String issuer,String icon,String targetCurrency,String targetIssuer,Float targetRate){
+    public CoinInfo(String currency,String issuer,String icon,String targetCurrency,String targetIssuer,Float targetRate,Boolean depositAddress){
         this.currency = currency;
         this.issuer = issuer;
         this.icon = icon;
         this.targetCurrency = targetCurrency;
         this.targetIssuer = targetIssuer;
         this.targetRate = targetRate;
+        this.depositAddress = depositAddress;
     }
 
 
@@ -100,5 +104,14 @@ public class CoinInfo {
         this.targetRate = targetRate;
     }
 
+    public Boolean getDepositAddress() {
+        return depositAddress;
+    }
+
+    public void setDepositAddress(Boolean depositAddress) {
+        this.depositAddress = depositAddress;
+    }
+
+    
     
 }
