@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.whispersystems.dispatch.io.RedisPubSubConnectionFactory;
 import org.whispersystems.dispatch.redis.PubSubConnection;
 import org.whispersystems.dispatch.redis.PubSubReply;
+import org.whispersystems.dispatch.util.Util;
 
 import java.io.IOException;
 import java.util.Map;
@@ -96,6 +97,7 @@ public class DispatchManager extends Thread {
       } catch (IOException e) {
         logger.warn("***** PubSub Connection Error *****", e);
         if (running) {
+          Util.sleep(5000);
           this.pubSubConnection.close();
           this.pubSubConnection = redisPubSubConnectionFactory.connect();
           resubscribeAll();
