@@ -38,6 +38,8 @@ import java.util.concurrent.TimeUnit;
 
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.testing.junit.ResourceTestRule;
+import org.whispersystems.textsecuregcm.util.Util;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
@@ -150,7 +152,7 @@ public class AccountControllerTest {
 
     assertThat(response.getStatus()).isEqualTo(200);
 
-    verify(smsSender).deliverSmsVerification(eq(SENDER), eq(Optional.empty()), anyString());
+    verify(smsSender).deliverSmsVerification(eq(SENDER), eq(Optional.empty()), anyString(), Util.Sms.AWS);
     verify(abusiveHostRules).getAbusiveHostRulesFor(eq(NICE_HOST));
   }
   
@@ -166,7 +168,7 @@ public class AccountControllerTest {
 
     assertThat(response.getStatus()).isEqualTo(200);
 
-    verify(smsSender).deliverSmsVerification(eq(SENDER), eq(Optional.of("ios")), anyString());
+    verify(smsSender).deliverSmsVerification(eq(SENDER), eq(Optional.of("ios")), anyString(), Util.Sms.AWS);
   }
 
   @Test
@@ -181,7 +183,7 @@ public class AccountControllerTest {
 
     assertThat(response.getStatus()).isEqualTo(200);
 
-    verify(smsSender).deliverSmsVerification(eq(SENDER), eq(Optional.of("android-ng")), anyString());
+    verify(smsSender).deliverSmsVerification(eq(SENDER), eq(Optional.of("android-ng")), anyString(), Util.Sms.AWS);
   }
 
   @Test
@@ -213,7 +215,7 @@ public class AccountControllerTest {
 
     verifyNoMoreInteractions(abusiveHostRules);
     verify(recaptchaClient).verify(eq(VALID_CAPTCHA_TOKEN));
-    verify(smsSender).deliverSmsVerification(eq(SENDER), eq(Optional.empty()), anyString());
+    verify(smsSender).deliverSmsVerification(eq(SENDER), eq(Optional.empty()), anyString(), Util.Sms.AWS);
   }
 
   @Test
@@ -334,7 +336,7 @@ public class AccountControllerTest {
 
     assertThat(response.getStatus()).isEqualTo(200);
 
-    verify(smsSender).deliverSmsVerification(eq("+12345678901"), eq(Optional.empty()), anyString());
+    verify(smsSender).deliverSmsVerification(eq("+12345678901"), eq(Optional.empty()), anyString(), Util.Sms.AWS);
   }
 
   @Test

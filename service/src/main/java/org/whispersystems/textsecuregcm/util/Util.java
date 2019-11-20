@@ -31,6 +31,11 @@ import java.util.regex.Pattern;
 
 public class Util {
 
+  public enum Sms{
+    AWS,
+    TWILIO
+  }
+
   private static final Pattern COUNTRY_CODE_PATTERN = Pattern.compile("^\\+([17]|2[07]|3[0123469]|4[013456789]|5[12345678]|6[0123456]|8[1246]|9[0123458]|\\d{3})");
 
   public static byte[] getContactToken(String number) {

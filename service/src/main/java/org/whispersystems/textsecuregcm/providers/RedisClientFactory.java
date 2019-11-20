@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.whispersystems.dispatch.io.RedisPubSubConnectionFactory;
 import org.whispersystems.dispatch.redis.PubSubConnection;
 import org.whispersystems.textsecuregcm.configuration.CircuitBreakerConfiguration;
+import org.whispersystems.textsecuregcm.configuration.RedisConfiguration;
 import org.whispersystems.textsecuregcm.redis.ReplicatedJedisPool;
 import org.whispersystems.textsecuregcm.util.Util;
 
@@ -41,29 +42,35 @@ public class RedisClientFactory implements RedisPubSubConnectionFactory {
 
   private final String    host;
   private final int       port;
+  private String          pwd;
   private final ReplicatedJedisPool jedisPool;
 
-  public RedisClientFactory(String name, String url, List<String> replicaUrls, CircuitBreakerConfiguration circuitBreakerConfiguration)
-      throws URISyntaxException
-  {
+//  public RedisClientFactory(String name, String url, List<String> replicaUrls, CircuitBreakerConfiguration circuitBreakerConfiguration)
+//      throws URISyntaxException
+
+  public RedisClientFactory(String name, RedisConfiguration config, CircuitBreakerConfiguration circuitBreakerConfiguration) throws URISyntaxException {
     JedisPoolConfig poolConfig = new JedisPoolConfig();
     poolConfig.setTestOnBorrow(true);
+    String url = config.getUrl();
+    List<String> replicaUrls = config.getReplicaUrls();
 
     URI redisURI = new URI(url);
 
     this.host      = redisURI.getHost();
     this.port      = redisURI.getPort();
+    this.pwd       = config.getPwd();
 
-    JedisPool       masterPool   = new JedisPool(poolConfig, host, port, Protocol.DEFAULT_TIMEOUT, null);
+    JedisPool       masterPool   = new JedisPool(poolConfig, host, port, Protocol.DEFAULT_TIMEOUT, pwd);
+
+    pwd = pwd == "" ? null : pwd;
     List<JedisPool> replicaPools = new LinkedList<>();
-
     for (String replicaUrl : replicaUrls) {
       URI replicaURI = new URI(replicaUrl);
 
       replicaPools.add(new JedisPool(poolConfig, replicaURI.getHost(), replicaURI.getPort(),
-                                     500, Protocol.DEFAULT_TIMEOUT, null,
-                                     Protocol.DEFAULT_DATABASE, null, false, null ,
-                                     null, null));
+              500, Protocol.DEFAULT_TIMEOUT, pwd,
+              config.getDb(), null, false, null ,
+              null, null));
     }
 
     this.jedisPool = new ReplicatedJedisPool(name, masterPool, replicaPools, circuitBreakerConfiguration);

@@ -1,1 +1,1 @@
-nohup java -jar target/TextSecureServer-2.26.jar server config/signal_local.yml > log/signal.log & 
+java -jar service/target/TextSecureServer-2.55.jar server config/radar.yml & 

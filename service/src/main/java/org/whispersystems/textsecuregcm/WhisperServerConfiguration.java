@@ -151,6 +151,12 @@ public class WhisperServerConfiguration extends Configuration {
   @JsonProperty
   private RecaptchaConfiguration recaptcha;
 
+
+  @Valid
+  @NotNull
+  @JsonProperty
+  private SnsConfiguration sns;
+
   private Map<String, String> transparentDataIndex = new HashMap<>();
 
   public RecaptchaConfiguration getRecaptchaConfiguration() {
@@ -237,6 +243,12 @@ public class WhisperServerConfiguration extends Configuration {
     return profiles;
   }
 
+
+  public SnsConfiguration getSnsConfiguration() {
+    return sns;
+  }
+
+
   public UnidentifiedDeliveryConfiguration getDeliveryCertificate() {
     return unidentifiedDelivery;
   }
@@ -266,5 +278,6 @@ public class WhisperServerConfiguration extends Configuration {
   public Map<String, String> getTransparentDataIndex() {
     return transparentDataIndex;
   }
+
 
 }

@@ -32,6 +32,12 @@ public class RedisConfiguration {
   private String url;
 
   @JsonProperty
+  private String pwd;
+
+  @JsonProperty
+  private int db = 0;
+
+  @JsonProperty
   @NotNull
   private List<String> replicaUrls;
 
@@ -50,5 +56,13 @@ public class RedisConfiguration {
 
   public CircuitBreakerConfiguration getCircuitBreakerConfiguration() {
     return circuitBreaker;
+  }
+
+  public String getPwd() {
+    return pwd;
+  }
+
+  public int getDb() {
+    return db;
   }
 }

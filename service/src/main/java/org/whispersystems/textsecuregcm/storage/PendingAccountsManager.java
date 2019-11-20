@@ -23,11 +23,12 @@ import org.slf4j.LoggerFactory;
 import org.whispersystems.textsecuregcm.auth.StoredVerificationCode;
 import org.whispersystems.textsecuregcm.redis.ReplicatedJedisPool;
 import org.whispersystems.textsecuregcm.util.SystemMapper;
+import org.whispersystems.textsecuregcm.util.Util;
+import redis.clients.jedis.Jedis;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Optional;
-
-import redis.clients.jedis.Jedis;
 
 public class PendingAccountsManager {
 
@@ -35,9 +36,11 @@ public class PendingAccountsManager {
 
   private static final String CACHE_PREFIX = "pending_account2::";
 
-  private final PendingAccounts     pendingAccounts;
+  private final PendingAccounts pendingAccounts;
   private final ReplicatedJedisPool cacheClient;
   private final ObjectMapper        mapper;
+
+  private HashMap<String, Optional<Util.Sms>> pendingSms = new HashMap<>();
 
   public PendingAccountsManager(PendingAccounts pendingAccounts, ReplicatedJedisPool cacheClient)
   {
@@ -54,6 +57,7 @@ public class PendingAccountsManager {
   public void remove(String number) {
     memcacheDelete(number);
     pendingAccounts.remove(number);
+    pendingSms.remove(number);
   }
 
   public Optional<StoredVerificationCode> getCodeForNumber(String number) {
@@ -65,6 +69,28 @@ public class PendingAccountsManager {
     }
 
     return code;
+  }
+  public Util.Sms getSmsForNumber(String number, Optional<Util.Sms> defaultSms) {
+    Optional code = getCodeForNumber(number);
+    if (!code.isPresent()){
+      pendingSms.put(number,defaultSms);
+    }else {
+      Optional<Util.Sms> sms = pendingSms.get(number);
+      if (sms != null && sms.isPresent()){
+        switch (sms.get()){
+          case AWS:
+            pendingSms.put(number,Optional.of(Util.Sms.TWILIO));
+            break;
+          case TWILIO:
+            pendingSms.put(number,Optional.of(Util.Sms.AWS));
+            break;
+        }
+      }else {
+        pendingSms.put(number,defaultSms);
+      }
+    }
+    return pendingSms.get(number).get();
+
   }
 
   private void memcacheSet(String number, StoredVerificationCode code) {

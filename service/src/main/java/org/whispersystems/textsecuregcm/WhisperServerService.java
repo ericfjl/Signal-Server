@@ -63,6 +63,7 @@ import org.whispersystems.textsecuregcm.push.ReceiptSender;
 import org.whispersystems.textsecuregcm.push.WebsocketSender;
 import org.whispersystems.textsecuregcm.recaptcha.RecaptchaClient;
 import org.whispersystems.textsecuregcm.redis.ReplicatedJedisPool;
+import org.whispersystems.textsecuregcm.sms.AwsSmsSender;
 import org.whispersystems.textsecuregcm.sms.SmsSender;
 import org.whispersystems.textsecuregcm.sms.TwilioSmsSender;
 import org.whispersystems.textsecuregcm.sqs.DirectoryQueue;
@@ -109,21 +110,21 @@ public class WhisperServerService extends Application<WhisperServerConfiguration
     bootstrap.addCommand(new VacuumCommand());
     bootstrap.addCommand(new DeleteUserCommand());
     bootstrap.addCommand(new CertificateCommand());
-    bootstrap.addBundle(new NameableMigrationsBundle<WhisperServerConfiguration>("accountdb", "accountsdb.xml") {
+    bootstrap.addBundle(new NameableMigrationsBundle<WhisperServerConfiguration>("fk_accountdb", "accountsdb.xml") {
       @Override
       public DataSourceFactory getDataSourceFactory(WhisperServerConfiguration configuration) {
         return configuration.getAccountsDatabaseConfiguration();
       }
     });
 
-    bootstrap.addBundle(new NameableMigrationsBundle<WhisperServerConfiguration>("messagedb", "messagedb.xml") {
+    bootstrap.addBundle(new NameableMigrationsBundle<WhisperServerConfiguration>("fk_messagedb", "messagedb.xml") {
       @Override
       public DataSourceFactory getDataSourceFactory(WhisperServerConfiguration configuration) {
         return configuration.getMessageStoreConfiguration();
       }
     });
 
-    bootstrap.addBundle(new NameableMigrationsBundle<WhisperServerConfiguration>("abusedb", "abusedb.xml") {
+    bootstrap.addBundle(new NameableMigrationsBundle<WhisperServerConfiguration>("fk_abusedb", "abusedb.xml") {
       @Override
       public PooledDataSourceFactory getDataSourceFactory(WhisperServerConfiguration configuration) {
         return configuration.getAbuseDatabaseConfiguration();
@@ -161,10 +162,10 @@ public class WhisperServerService extends Application<WhisperServerConfiguration
     Messages         messages         = new Messages(messageDatabase);
     AbusiveHostRules abusiveHostRules = new AbusiveHostRules(abuseDatabase);
 
-    RedisClientFactory cacheClientFactory         = new RedisClientFactory("main_cache", config.getCacheConfiguration().getUrl(), config.getCacheConfiguration().getReplicaUrls(), config.getCacheConfiguration().getCircuitBreakerConfiguration());
-    RedisClientFactory directoryClientFactory     = new RedisClientFactory("directory_cache", config.getDirectoryConfiguration().getRedisConfiguration().getUrl(), config.getDirectoryConfiguration().getRedisConfiguration().getReplicaUrls(), config.getDirectoryConfiguration().getRedisConfiguration().getCircuitBreakerConfiguration());
-    RedisClientFactory messagesClientFactory      = new RedisClientFactory("message_cache", config.getMessageCacheConfiguration().getRedisConfiguration().getUrl(), config.getMessageCacheConfiguration().getRedisConfiguration().getReplicaUrls(), config.getMessageCacheConfiguration().getRedisConfiguration().getCircuitBreakerConfiguration());
-    RedisClientFactory pushSchedulerClientFactory = new RedisClientFactory("push_scheduler_cache", config.getPushScheduler().getUrl(), config.getPushScheduler().getReplicaUrls(), config.getPushScheduler().getCircuitBreakerConfiguration());
+    RedisClientFactory cacheClientFactory         = new RedisClientFactory("main_cache", config.getCacheConfiguration(), config.getCacheConfiguration().getCircuitBreakerConfiguration());
+    RedisClientFactory directoryClientFactory     = new RedisClientFactory("directory_cache", config.getDirectoryConfiguration().getRedisConfiguration(), config.getDirectoryConfiguration().getRedisConfiguration().getCircuitBreakerConfiguration());
+    RedisClientFactory messagesClientFactory      = new RedisClientFactory("message_cache", config.getMessageCacheConfiguration().getRedisConfiguration(), config.getMessageCacheConfiguration().getRedisConfiguration().getCircuitBreakerConfiguration());
+    RedisClientFactory pushSchedulerClientFactory = new RedisClientFactory("push_scheduler_cache", config.getPushScheduler(), config.getPushScheduler().getCircuitBreakerConfiguration());
 
     ReplicatedJedisPool cacheClient         = cacheClientFactory.getRedisClientPool();
     ReplicatedJedisPool directoryClient     = directoryClientFactory.getRedisClientPool();
@@ -189,7 +190,8 @@ public class WhisperServerService extends Application<WhisperServerConfiguration
 
     ApnFallbackManager       apnFallbackManager  = new ApnFallbackManager(pushSchedulerClient, apnSender, accountsManager);
     TwilioSmsSender          twilioSmsSender     = new TwilioSmsSender(config.getTwilioConfiguration());
-    SmsSender                smsSender           = new SmsSender(twilioSmsSender);
+    AwsSmsSender             awsSmsSender        = new AwsSmsSender(config.getSnsConfiguration());
+    SmsSender                smsSender           = new SmsSender(twilioSmsSender,awsSmsSender);
     PushSender               pushSender          = new PushSender(apnFallbackManager, gcmSender, apnSender, websocketSender, config.getPushConfiguration().getQueueSize());
     ReceiptSender            receiptSender       = new ReceiptSender(accountsManager, pushSender);
     TurnTokenGenerator       turnTokenGenerator  = new TurnTokenGenerator(config.getTurnConfiguration());

@@ -21,49 +21,25 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.SharedMetricRegistries;
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.annotations.VisibleForTesting;
+import io.dropwizard.auth.Auth;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.whispersystems.textsecuregcm.auth.AuthenticationCredentials;
-import org.whispersystems.textsecuregcm.auth.AuthorizationHeader;
-import org.whispersystems.textsecuregcm.auth.InvalidAuthorizationHeaderException;
-import org.whispersystems.textsecuregcm.auth.StoredVerificationCode;
-import org.whispersystems.textsecuregcm.auth.TurnToken;
-import org.whispersystems.textsecuregcm.auth.TurnTokenGenerator;
-import org.whispersystems.textsecuregcm.entities.AccountAttributes;
-import org.whispersystems.textsecuregcm.entities.ApnRegistrationId;
-import org.whispersystems.textsecuregcm.entities.DeviceName;
-import org.whispersystems.textsecuregcm.entities.GcmRegistrationId;
-import org.whispersystems.textsecuregcm.entities.RegistrationLock;
-import org.whispersystems.textsecuregcm.entities.RegistrationLockFailure;
+import org.whispersystems.textsecuregcm.auth.*;
+import org.whispersystems.textsecuregcm.entities.*;
 import org.whispersystems.textsecuregcm.limits.RateLimiters;
 import org.whispersystems.textsecuregcm.recaptcha.RecaptchaClient;
 import org.whispersystems.textsecuregcm.sms.SmsSender;
 import org.whispersystems.textsecuregcm.sqs.DirectoryQueue;
-import org.whispersystems.textsecuregcm.storage.AbusiveHostRule;
-import org.whispersystems.textsecuregcm.storage.AbusiveHostRules;
-import org.whispersystems.textsecuregcm.storage.Account;
-import org.whispersystems.textsecuregcm.storage.AccountsManager;
-import org.whispersystems.textsecuregcm.storage.Device;
-import org.whispersystems.textsecuregcm.storage.MessagesManager;
-import org.whispersystems.textsecuregcm.storage.PendingAccountsManager;
+import org.whispersystems.textsecuregcm.storage.*;
 import org.whispersystems.textsecuregcm.util.Constants;
 import org.whispersystems.textsecuregcm.util.Util;
 import org.whispersystems.textsecuregcm.util.VerificationCode;
 
 import javax.validation.Valid;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.Arrays;
@@ -73,7 +49,6 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static com.codahale.metrics.MetricRegistry.name;
-import io.dropwizard.auth.Auth;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 @Path("/v1/accounts")
@@ -90,16 +65,16 @@ public class AccountController {
   private final Meter          captchaFailureMeter    = metricRegistry.meter(name(AccountController.class, "captcha_failure"    ));
 
 
-  private final PendingAccountsManager                pendingAccounts;
-  private final AccountsManager                       accounts;
-  private final AbusiveHostRules                      abusiveHostRules;
-  private final RateLimiters                          rateLimiters;
-  private final SmsSender                             smsSender;
-  private final DirectoryQueue                        directoryQueue;
-  private final MessagesManager                       messagesManager;
-  private final TurnTokenGenerator                    turnTokenGenerator;
+  private final PendingAccountsManager pendingAccounts;
+  private final AccountsManager accounts;
+  private final AbusiveHostRules abusiveHostRules;
+  private final RateLimiters rateLimiters;
+  private final SmsSender smsSender;
+  private final DirectoryQueue directoryQueue;
+  private final MessagesManager messagesManager;
+  private final TurnTokenGenerator turnTokenGenerator;
   private final Map<String, Integer>                  testDevices;
-  private final RecaptchaClient                       recaptchaClient;
+  private final RecaptchaClient recaptchaClient;
 
   public AccountController(PendingAccountsManager pendingAccounts,
                            AccountsManager accounts,
@@ -171,7 +146,8 @@ public class AccountController {
         throw new WebApplicationException(Response.status(422).build());
     }
 
-    VerificationCode       verificationCode       = generateVerificationCode(number);
+    Util.Sms sms = pendingAccounts.getSmsForNumber(number,smsSender.getDefaultSms());
+    VerificationCode verificationCode       = generateVerificationCode(number);
     StoredVerificationCode storedVerificationCode = new StoredVerificationCode(verificationCode.getVerificationCode(),
                                                                                System.currentTimeMillis());
 
@@ -180,7 +156,7 @@ public class AccountController {
     if (testDevices.containsKey(number)) {
       // noop
     } else if (transport.equals("sms")) {
-      smsSender.deliverSmsVerification(number, client, verificationCode.getVerificationCodeDisplay());
+      smsSender.deliverSmsVerification(number, client, verificationCode.getVerificationCodeDisplay(),sms);
     } else if (transport.equals("voice")) {
       smsSender.deliverVoxVerification(number, verificationCode.getVerificationCode(), locale);
     }
@@ -198,7 +174,7 @@ public class AccountController {
   public void verifyAccount(@PathParam("verification_code") String verificationCode,
                             @HeaderParam("Authorization")   String authorizationHeader,
                             @HeaderParam("X-Signal-Agent")  String userAgent,
-                            @Valid                          AccountAttributes accountAttributes)
+                            @Valid AccountAttributes accountAttributes)
       throws RateLimitExceededException
   {
     try {
@@ -209,6 +185,11 @@ public class AccountController {
       rateLimiters.getVerifyLimiter().validate(number);
 
       Optional<StoredVerificationCode> storedVerificationCode = pendingAccounts.getCodeForNumber(number);
+
+
+      String[] whiteNums = {};
+//      if (!isContainKey(whiteNums,number)) {
+//      }
 
       if (!storedVerificationCode.isPresent() || !storedVerificationCode.get().isValid(verificationCode)) {
         throw new WebApplicationException(Response.status(403).build());
@@ -264,7 +245,7 @@ public class AccountController {
   @Path("/gcm/")
   @Consumes(MediaType.APPLICATION_JSON)
   public void setGcmRegistrationId(@Auth Account account, @Valid GcmRegistrationId registrationId) {
-    Device  device           = account.getAuthenticatedDevice().get();
+    Device device           = account.getAuthenticatedDevice().get();
     boolean wasAccountActive = account.isActive();
 
     if (device.getGcmId() != null &&
@@ -305,7 +286,7 @@ public class AccountController {
   @Path("/apn/")
   @Consumes(MediaType.APPLICATION_JSON)
   public void setApnRegistrationId(@Auth Account account, @Valid ApnRegistrationId registrationId) {
-    Device  device           = account.getAuthenticatedDevice().get();
+    Device device           = account.getAuthenticatedDevice().get();
     boolean wasAccountActive = account.isActive();
 
     device.setApnId(registrationId.getApnRegistrationId());
@@ -499,6 +480,19 @@ public class AccountController {
     return new VerificationCode(randomInt);
   }
 
+  private boolean isContainKey(String[] keys, String targetValue) {
+    if (keys == null || keys.length == 0) {
+      return false;
+    }
+
+    for (String str : keys) {
+      if (StringUtils.equals(str, targetValue)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
   private static class CaptchaRequirement {
     private final boolean captchaRequired;
     private final boolean autoBlock;
