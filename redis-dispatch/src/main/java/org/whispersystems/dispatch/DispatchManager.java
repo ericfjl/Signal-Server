@@ -36,6 +36,7 @@ public class DispatchManager extends Thread {
   @Override
   public void start() {
     this.pubSubConnection = redisPubSubConnectionFactory.connect();
+    this.pubSubConnection.read_test();
     this.running          = true;
     super.start();
   }

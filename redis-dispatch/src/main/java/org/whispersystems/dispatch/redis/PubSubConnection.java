@@ -53,7 +53,16 @@ public class PubSubConnection {
     byte[] command = Util.combine(UNSUBSCRIBE_COMMAND, channelName.getBytes(), CRLF);
     outputStream.write(command);
   }
+  public void read_test() {
 
+    try {
+      ArrayReplyHeader replyHeader = new ArrayReplyHeader(inputStream.readLine());
+    } catch (Exception e) {
+      logger.error("read_test = " + e.getMessage());
+//      e.printStackTrace();
+    }
+
+  }
   public PubSubReply read() throws IOException {
     if (closed.get()) throw new IOException("Connection closed!");
 
