@@ -73,6 +73,7 @@ public class AwsSmsSender {
           .withMessageAttributes(this.smsAttributes));
       logger.info(" number=" + destination + " | AwsSmsSender result = " + result.toString());
     } catch (Exception ex) {
+      logger.error("AwsSmsSender error: " + ex.getMessage());
       throw new Exception(ex);
     }
 
